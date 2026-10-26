@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Microplastics Removal Plant — team task</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1d2329; background: #eef1f4; }
+  .hidden { display: none !important; }
+  header { background: #20384f; color: #fff; padding: 8px 14px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  header .big { font-size: 17px; font-weight: bold; }
+  header .chip { background: #2f5070; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+  header .chip.ready { background: #2e7d4f; }
+  header button { margin-left: 0; }
+  main { display: grid; grid-template-columns: minmax(300px, 1.05fr) minmax(320px, 1.25fr) minmax(280px, 0.9fr); gap: 10px; padding: 10px; align-items: start; }
+  section { background: #fff; border: 1px solid #cfd6dd; border-radius: 4px; padding: 10px 12px; min-width: 0; }
+  h2 { font-size: 15px; margin: 0 0 6px; color: #20384f; }
+  h3 { font-size: 13px; margin: 12px 0 4px; color: #20384f; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th, td { border: 1px solid #dde2e7; padding: 3px 5px; text-align: right; vertical-align: top; }
+  th { background: #f1f4f7; font-weight: normal; color: #445; }
+  td.l, th.l { text-align: left; }
+  .scroll { max-height: 260px; overflow: auto; }
+  .note { font-size: 12px; color: #555; line-height: 1.4; }
+  .notice { background: #fff4d6; border: 1px solid #e6c766; padding: 7px 9px; margin: 6px 0; font-size: 13px; }
+  .priv { background: #f3f7fb; border-left: 3px solid #5b86b0; padding: 5px 8px; margin: 4px 0; font-size: 12px; }
+  button { font-family: inherit; font-size: 13px; padding: 4px 10px; border: 1px solid #6b7c8c; background: #fff; border-radius: 3px; cursor: pointer; }
+  button.primary { background: #20384f; color: #fff; border-color: #20384f; }
+  button.go { background: #2e7d4f; color: #fff; border-color: #2e7d4f; }
+  button:disabled { opacity: .45; cursor: default; }
+  input, select, textarea { font-family: inherit; font-size: 13px; padding: 3px 5px; border: 1px solid #aab4be; border-radius: 3px; }
+  .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 4px 0; }
+  .chat { display: flex; flex-direction: column; height: calc(100vh - 90px); min-height: 520px; }
+  .clog { flex: 1; overflow-y: auto; border: 1px solid #e2e6ea; padding: 6px; background: #fafbfc; }
+  .msg { margin: 5px 0; padding: 6px 8px; border-radius: 6px; white-space: pre-wrap; line-height: 1.35; }
+  .msg .who { font-size: 11px; color: #667; margin-bottom: 2px; }
+  .msg.me { background: #dfeefe; margin-left: 24px; } .msg.other { background: #fff; border: 1px solid #e3e7eb; margin-right: 24px; }
+  .msg.ai { background: #f2ecfb; border: 1px solid #e0d4f3; margin-right: 24px; }
+  .badge { font-size: 10px; background: #6a4fa3; color: #fff; padding: 0 4px; border-radius: 3px; margin-left: 3px; }
+  .gate { font-size: 12px; color: #8a5300; min-height: 16px; margin: 4px 0; }
+  .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #a33; color: #fff; padding: 8px 14px; border-radius: 4px; z-index: 50; font-size: 13px; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 40; }
+  .modal { background: #fff; max-width: 720px; max-height: 90vh; overflow: auto; padding: 20px 24px; border-radius: 4px; line-height: 1.45; }
+  .modal h2 { font-size: 18px; }
+  #landing { max-width: 760px; margin: 30px auto; }
+  #landing section { margin-bottom: 14px; }
+  .edge-pos { color: #1f7a3c; font-weight: bold; } .edge-neg { color: #b23b2b; font-weight: bold; }
+  canvas { width: 100%; height: auto; border: 1px solid #e2e6ea; }
+  .causes label { display: block; margin: 2px 0; font-size: 12px; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } .chat { height: 520px; } }
+
+  /* ---- tutorial ---- */
+  .tutm { max-width: 880px; width: 94vw; }
+  .tutstep { font-size: 12px; color: #6b7c8c; margin-bottom: 4px; }
+  .dots { display: flex; gap: 5px; margin-bottom: 8px; } .dots span { width: 22px; height: 5px; border-radius: 3px; background: #d5dce3; } .dots span.on { background: #20384f; }
+  #tutSys { width: 100%; height: auto; background: #f7fafc; border: 1px solid #e2e6ea; border-radius: 4px; }
+  #tutSys .part { transition: opacity .3s; }
+  #tutSys.focus .part { opacity: .28; } #tutSys.focus .part.hl { opacity: 1; }
+  #tutSys .part.hl .shape { stroke: #e07b00; stroke-width: 3.5; }
+  #tutSys .lbl { font: 13px Arial; fill: #20384f; } #tutSys .lbl.small { font-size: 11px; fill: #556; }
+  .pipe { stroke: #9aa9b7; stroke-width: 14; fill: none; stroke-linecap: round; }
+  .water { stroke: #4b9bd6; stroke-width: 6; fill: none; stroke-dasharray: 10 12; animation: flow 1.2s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -44; } }
+  .piston { animation: stroke 1.4s ease-in-out infinite; }
+  @keyframes stroke { 50% { transform: translateX(40px); } }
+  @media (prefers-reduced-motion: reduce) { .water, .piston { animation: none; } }
+  #tutExtra { margin: 8px 0; min-height: 10px; }
+  #tutExtra svg { max-width: 100%; height: auto; }
+  .tuttext { font-size: 15px; line-height: 1.5; }
+  .term { background: #fff2d9; border-bottom: 2px solid #e0a800; padding: 0 2px; font-weight: bold; }
+  .vocab { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; } .vocab span { background: #eef3f8; border: 1px solid #cfd9e3; border-radius: 12px; padding: 2px 9px; font-size: 12px; }
+  .quiz .q { margin: 10px 0; } .quiz label { display: block; margin: 3px 0 3px 10px; }
+  .quiz .bad { color: #b23b2b; font-size: 12px; } .quiz .good { color: #1f7a3c; font-size: 12px; }
+  #glossBody dt { font-weight: bold; margin-top: 8px; } #glossBody dd { margin: 2px 0 0 0; }
+  .instr h3 { margin: 14px 0 4px; font-size: 14px; } .instr p, .instr li { font-size: 14px; line-height: 1.5; } .instr ul, .instr ol { margin: 4px 0; padding-left: 22px; }
+
+  /* ---- in-context term explanations ---- */
+  .gt { border-bottom: 1px dotted #5b86b0; cursor: help; }
+  #termPop { position: fixed; z-index: 80; max-width: 300px; background: #20384f; color: #fff; font-size: 13px; line-height: 1.4; padding: 8px 10px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+  .maplegend { font-size: 12px; color: #445; line-height: 1.5; margin: 4px 0; }
+  #phaseBanner { background: #e8f1fa; border: 1px solid #9cbcdc; padding: 7px 9px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; }
+  .why { color: #556; font-style: italic; }
+  .indivm { max-width: 760px; width: 94vw; }
+
+  /* ---- dashboard tour ---- */
+  #tourBlock { position: fixed; inset: 0; z-index: 60; }
+  #tourSpot { position: fixed; z-index: 61; border-radius: 6px; box-shadow: 0 0 0 9999px rgba(15,25,35,.55); outline: 3px solid #e0a800; pointer-events: none; transition: all .2s; }
+  #tourBox { position: fixed; z-index: 62; width: 370px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); overflow: auto; background: #fff; border-radius: 6px; padding: 14px 16px; box-shadow: 0 4px 18px rgba(0,0,0,.35); line-height: 1.45; font-size: 14px; }
+  #tourBox.wide { width: 640px; }
+  #tourBox h2 { font-size: 16px; margin: 4px 0 6px; } #tourBox ul { margin: 4px 0; padding-left: 20px; } #tourBox li { margin: 2px 0; }
+  #prTasks { padding-left: 20px; margin: 6px 0; } #prTasks li { margin: 3px 0; } #prTasks li.ok { color: #1f7a3c; } #prTasks li.ok::after { content: '  ✓ done'; font-weight: bold; }
+  #prSvg { width: 100%; border: 1px solid #e2e6ea; background: #fcfdfe; }
+  #prMsg { min-height: 18px; font-size: 13px; color: #8a5300; }
+
+</style>
+</head>
+<body>
+
+<div id="landing" class="hidden">
+  <section>
+    <h2>Team engineering task — join your team</h2>
+    <div class="row">Team code <input id="lCode" size="8"> Role <select id="lRole"><option value="ops">Operations</option><option value="diag">Diagnostics</option><option value="rel">Maintenance</option></select>
+      <button class="primary" id="lJoin">Join</button></div>
+    <div class="note">Your test administrator gives you the team code and your role (or a direct link).</div>
+  </section>
+  <section>
+    <h2>Local pilot (single browser, no server)</h2>
+    <div class="row">Team <select id="pConfig"><option value="HA">HA — you (Operations) + AI (Diagnostics)</option><option value="HH">HH — play both humans (switch roles)</option>
+      <option value="HHH">HHH — play all three humans</option><option value="HAH">HAH — play both humans + AI</option></select> Scenario <select id="pScen"><option value="pump">Pump station (factory)</option><option value="micro">Microplastics removal plant</option></select> Seed <input id="pSeed" size="6" value="7"> Practice <select id="pPrac"><option value="4">4 practice weeks</option><option value="0">no practice</option></select></div>
+    <div class="row">AI <select id="pProvider"><option value="mock">Mock teammate (offline, rule-based)</option><option value="anthropic">Anthropic API</option><option value="openai">OpenAI-compatible API</option></select>
+      Model <input id="pModel" value="claude-sonnet-5-5" size="16"> Key <input id="pKey" type="password" size="18" placeholder="pilot only"></div>
+    <div class="row"><button class="primary" id="pStart">Start local pilot</button></div>
+    <div class="note">The API key stays in this browser tab only. For data collection, run <code>server.js</code> so that the key stays on the server.</div>
+  </section>
+  <section id="console" class="hidden">
+    <h2>Researcher console (server)</h2>
+    <div class="row">Admin key <input id="cKey" type="password" size="12"> Team <select id="cConfig"><option>HH</option><option>HA</option><option>HHH</option><option>HAH</option></select> Scenario <select id="cScen"><option value="pump">Pump station</option><option value="micro">Microplastics</option></select> Seed <input id="cSeed" size="6" placeholder="random"> Practice <select id="cPrac"><option value="4">4 weeks</option><option value="0">none</option></select>
+      <button class="primary" id="cCreate">Create team</button> <button id="cList">Refresh list</button></div>
+    <div id="cOut" class="note"></div>
+  </section>
+</div>
+
+<div id="app" class="hidden">
+  <header id="hdr">
+    <span class="big" id="hName">Pump Station</span>
+    <span id="hWeek"></span>
+    <span>Plant value: <b id="hValue"></b></span>
+    <span>You: <b id="hRole"></b></span>
+    <span id="hTeam"></span>
+    <span id="hDebug"></span>
+    <button id="btnGloss" style="margin-left:auto">Glossary</button> <button id="btnTut" style="margin-left:0">Tutorial</button> <button id="btnInstr" style="margin-left:0">Instructions</button> <button id="btnTour" style="margin-left:0">Tour</button>
+  </header>
+  <main>
+    <section id="rolePanel">
+      <h2 id="rpTitle"></h2>
+      <div id="rpNotices"></div>
+      <div id="rpSettings" class="hidden">
+        <h3>Pump settings (you control these)</h3>
+        <div class="row">Pump speed <input type="number" id="setSpeed" min="40" max="100" step="5" style="width:64px">% &nbsp; Valve opening <input type="number" id="setValve" min="20" max="100" step="10" style="width:64px">%
+          <button id="setApply">Apply</button></div>
+        <div class="note" id="setCurrent"></div>
+      </div>
+      <div id="rpTests" class="hidden">
+        <h3>Diagnostic tests (<span id="testsLeft"></span> left this week)</h3>
+        <div id="testButtons"></div>
+      </div>
+      <div id="rpDynamic"></div>
+    </section>
+
+    <section id="shared">
+      <div id="phaseBanner" class="hidden"></div>
+      <div id="valueBox">
+      <h2 id="valueTitle">Plant value</h2>
+      <canvas id="valueChart" width="640" height="200"></canvas>
+      <div class="scroll" style="max-height:140px"><table id="valueTable"></table></div>
+      </div>
+
+      <div id="mapBox">
+      <h3>Shared causal map (everyone can edit)</h3>
+      <svg id="mapSvg" viewBox="0 0 520 300" style="width:100%;border:1px solid #e2e6ea;background:#fcfdfe"></svg>
+      <div class="maplegend" id="mapLegend"></div>
+      <div class="row">From <select id="mFrom"></select> to <select id="mTo"></select> effect <select id="mSign"><option value="+">+ (more → more)</option><option value="-">− (more → less)</option></select>
+        <label><input type="checkbox" id="mUncertain"> not sure yet (dashed)</label></div>
+      <div class="row">effect size <select id="mSize"><option value="">not rated</option><option value="small">small</option><option value="large">large</option></select>
+        why? <input id="mWhy" size="26" maxlength="300" placeholder="optional: your reason"> <button id="mAdd">Add / update link</button></div>
+      <div id="mapList" class="note"></div>
+      </div>
+
+      <div id="diagBox">
+      <h3>Diagnosis and recommendation</h3>
+      <div id="diagStatus" class="note"></div>
+      <div id="diagDraft"></div>
+      <details id="diagForm"><summary style="cursor:pointer;font-size:13px">Write a proposal</summary>
+        <div class="note" style="margin-top:6px">Causes you think are true:</div>
+        <div class="causes" id="dCauses"></div>
+        <div class="note" style="margin-top:6px">Fixes (interventions) you recommend:</div>
+        <div class="causes" id="dInts"></div>
+        <textarea id="dJust" rows="3" style="width:100%" placeholder="Which evidence supports this? (for example test results, sensor readings, operating records)"></textarea>
+        <div class="row"><button class="primary" id="dPropose">Propose to the team</button></div>
+      </details>
+      </div>
+    </section>
+
+    <section class="chat" id="chatSec">
+      <h2>Team chat</h2>
+      <div class="clog" id="chatLog"></div>
+      <div class="note" id="typing"></div>
+      <div class="row" style="flex-wrap:nowrap"><textarea id="chatIn" rows="2" style="flex:1" placeholder="Write to your team…"></textarea><button class="primary" id="chatSend">Send</button></div>
+      <div id="readyBox">
+      <div class="gate" id="gate"></div>
+      <button class="go" id="readyBtn">Ready for next week</button>
+      <div class="note" id="readyInfo"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+
+<div class="overlay hidden" id="tut"><div class="modal tutm">
+  <div class="tutstep" id="tutStep"></div>
+  <div class="dots" id="tutDots"></div>
+  <svg id="tutSys" viewBox="0 0 760 215" role="img" aria-label="Diagram of the water system: water supply, piston pump with motor, filter, valve, factory">
+    <defs><pattern id="mesh" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0,6 L6,0" stroke="#9fb3c4" stroke-width="1"/></pattern></defs>
+    <path class="pipe" d="M112,118 H172"/><path class="pipe" d="M252,118 H318"/><path class="pipe" d="M398,118 H468"/><path class="pipe" d="M532,118 H628"/>
+    <path class="water" d="M112,118 H172"/><path class="water" d="M252,118 H318"/><path class="water" d="M398,118 H468"/><path class="water" d="M532,118 H628"/>
+    <g class="part" id="p-src"><path class="shape" d="M20,78 H112 V160 H20 Z" fill="#cfe5f6" stroke="#5b86b0" stroke-width="2"/><path d="M24,100 q10,-6 20,0 t20,0 t20,0 t20,0" stroke="#4b9bd6" fill="none" stroke-width="2"/><text class="lbl" id="lbl-src" x="66" y="182" text-anchor="middle">Water supply</text></g>
+    <g class="part" id="p-pump"><rect class="shape" x="172" y="94" width="80" height="48" rx="6" fill="#fff" stroke="#20384f" stroke-width="2"/>
+      <g class="piston"><rect x="180" y="99" width="12" height="38" fill="#9aa9b7" stroke="#20384f"/></g>
+      <text class="lbl" x="212" y="172" text-anchor="middle">Piston pump</text></g>
+    <g class="part" id="p-motor"><rect class="shape" x="180" y="14" width="64" height="44" rx="5" fill="#e9eef3" stroke="#20384f" stroke-width="2"/><path d="M212,58 V94" stroke="#20384f" stroke-width="4"/><text class="lbl" x="212" y="41" text-anchor="middle">Motor</text></g>
+    <g class="part" id="p-thermo"><rect x="254" y="16" width="10" height="34" rx="5" fill="#fff" stroke="#b23b2b" stroke-width="1.5"/><circle cx="259" cy="54" r="7" fill="#b23b2b"/><rect x="257" y="28" width="4" height="24" fill="#b23b2b"/><text class="lbl small" x="272" y="38">°C</text></g>
+    <g class="part" id="p-filter"><rect class="shape" x="318" y="88" width="80" height="60" rx="6" fill="url(#mesh)" stroke="#20384f" stroke-width="2"/><text class="lbl" id="lbl-filter" x="358" y="172" text-anchor="middle">Filter</text></g>
+    <g class="part" id="p-valve"><path class="shape" d="M470,98 L530,138 L530,98 L470,138 Z" fill="#fff" stroke="#20384f" stroke-width="2"/><path d="M500,118 V80 M486,80 H514" stroke="#20384f" stroke-width="3"/><text class="lbl" x="500" y="172" text-anchor="middle">Valve</text></g>
+    <g class="part" id="p-meter"><circle cx="580" cy="118" r="15" fill="#fff" stroke="#20384f" stroke-width="2"/><path d="M580,118 L589,109" stroke="#b23b2b" stroke-width="2"/><text class="lbl small" x="580" y="152" text-anchor="middle">flow meter</text></g>
+    <g class="part" id="p-factory"><g id="shape-factory"><path class="shape" d="M630,160 V96 L660,78 V96 L690,78 V96 L720,78 V160 Z" fill="#eef1f4" stroke="#20384f" stroke-width="2"/><rect x="645" y="120" width="18" height="40" fill="#cfd6dd"/></g><g id="shape-tank" style="display:none"><path class="shape" d="M636,92 V156 Q636,164 646,164 H710 Q720,164 720,156 V92" fill="#e3f1fb" stroke="#20384f" stroke-width="2"/><ellipse cx="678" cy="92" rx="42" ry="9" fill="#f7fbfe" stroke="#20384f" stroke-width="2"/><path d="M640,128 H716" stroke="#4b9bd6" stroke-width="2"/></g><text class="lbl" id="lbl-out" x="676" y="186" text-anchor="middle">Factory</text></g>
+  </svg>
+  <div id="tutExtra"></div>
+  <h2 id="tutTitle" style="margin:10px 0 4px"></h2>
+  <div class="tuttext" id="tutText"></div>
+  <div class="vocab" id="tutVocab"></div>
+  <div class="row" style="margin-top:12px"><button id="tutBack">Back</button> <button class="primary" id="tutNext">Next</button> <span class="note" id="tutMsg"></span></div>
+</div></div>
+<div class="overlay hidden" id="gloss"><div class="modal"><h2>Glossary</h2><dl id="glossBody"></dl><button class="primary" id="glossClose">Close</button></div></div>
+
+<div class="overlay hidden" id="instr"><div class="modal instr"><div id="instrBody"></div><button class="primary" id="instrClose">Close</button></div></div>
+<div id="tourBlock" class="hidden"></div><div id="tourSpot" class="hidden"></div>
+<div id="tourBox" class="hidden"><div class="tutstep" id="tourStep"></div><h2 id="tourTitle"></h2><div id="tourText"></div>
+  <div class="row" style="margin-top:10px"><button id="tourBack">Back</button> <button class="primary" id="tourNext">Next</button></div></div>
+<div id="termPop" class="hidden"></div>
+<div class="overlay hidden" id="indivOv"><div class="modal indivm" id="indivBody"></div></div>
+<div class="overlay hidden" id="msgOv"><div class="modal"><div id="msgBody"></div><button class="primary" id="msgClose">OK</button></div></div>
+<div class="overlay hidden" id="endScreen"><div class="modal"><h2>The task has ended</h2><div id="endBody"></div><div class="row"><button id="endClose">Close</button> <button id="endLog" class="hidden">Download log (JSON)</button></div></div></div>
+
+<script>window.PS_DEFAULT_SCENARIO = 'micro';
+/* =====================================================================
+   Pump Station (simplified version; scenarios: pump station, microplastics removal plant): collaborative engineering diagnosis on a Tailorshop-style scoring frame
+   v.0.3: practice phase with reset, week-1 decision profile and recovery, causal-map scoring by knowledge level, individual maps before and after.
+   Shared core (browser + Node): engine, room (roles, permissions, gates), AI orchestration, scoring.
+   All dynamics are designed for this task (basis I); see blueprint Part F.
+   ===================================================================== */
+(function (root) {
+  'use strict';
+
+  // ------------------------------------------------------------------ parameters (simplified version: 6 variables, 2 true faults)
+  var P = {
+    weeks: 12, hours: 168, startAccount: 100000, waterPrice: 1.0, requirement: 7500, shortfallPenalty: 0.5,
+    fixedCost: 5000, energyPrice: 0.15, pumpAsset: 40000, bigPumpAsset: 60000, Qmax: 60,
+    tripT: 85, coolingBonus: 10, tempLimit: 70, capFine: 3000, capWeek: 7,
+    testsPerWeek: 2, mapWeeks: [4, 12], initialDiagWeek: 6, finalDiagWeek: 12, practiceWeeks: 4, practiceSeedOffset: 7919,
+    foul: 0.00003, foulLarge: 0.35, noise: 0.04, start: { S: 90, V: 50, R: 3.0, C: 0.95, T: 80 }
+  };
+
+  var VARS = [
+    ['speed', 'Pump speed'], ['valve', 'Valve opening'], ['filter', 'Filter clogging'],
+    ['flow', 'Water flow'], ['temp', 'Motor temperature'], ['shutdowns', 'Shutdowns']
+  ];
+  // ground-truth causal structure (direct effects) — used only for scoring, never shown to any agent
+  var TRUE_EDGES = [
+    ['speed', 'flow', '+'], ['speed', 'temp', '+'],
+    ['valve', 'flow', '+'], ['valve', 'temp', '-'],
+    ['filter', 'flow', '-'], ['filter', 'temp', '+'],
+    ['flow', 'filter', '+'], ['temp', 'shutdowns', '+']
+  ];
+  var CAUSES = [
+    ['filter', 'A clogged filter reduces the water flow and makes the motor work harder', true],
+    ['config', 'Running at high speed against a partly closed valve overheats the motor', true],
+    ['undersized', 'The pump is too small for the production requirement', false],
+    ['fan', 'The motor cooling fan has failed', false],
+    ['actuator', 'The valve actuator is faulty and does not follow its setting', false]
+  ];
+  var INTERVENTIONS = [
+    { id: 'filter_cartridge', name: 'Replace filter cartridge', cost: 800, delay: 1, failureChance: 'low', note: 'Restores a clean filter. Filters clog again with use.' },
+    { id: 'filter_large', name: 'Install larger filter housing', cost: 9000, delay: 2, failureChance: 'low', note: 'Clean filter that clogs much more slowly. Installation takes two weeks.' },
+    { id: 'cooling', name: 'Motor cooling upgrade', cost: 5000, delay: 1, failureChance: 'medium', note: 'Raises the temperature at which the motor shuts down by 10 °C. Does not make the motor run cooler.' },
+    { id: 'big_pump', name: 'Replace pump with a larger model', cost: 40000, delay: 3, failureChance: 'low', note: 'About 35% more flow at the same settings, but the motor runs much hotter.' },
+    { id: 'actuator', name: 'Replace valve actuator', cost: 2500, delay: 1, failureChance: 'low', note: 'New actuator for the control valve.' }
+  ];
+  var TESTS = [
+    { id: 'filter_dp', name: 'Filter inspection', cost: 300, params: false },
+    { id: 'thermal', name: 'Motor check (temperature and cooling fan)', cost: 300, params: false },
+    { id: 'testrun', name: 'One-hour test run at chosen speed and valve opening', cost: 500, params: true }
+  ];
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function r1(v, d) { var f = Math.pow(10, d || 0); return Math.round(v * f) / f; }
+  function clogPct(R) { return Math.round(clamp((R - 0.8) / 3.2, 0, 1) * 100); }   // shown as "% clogged"
+
+  // ------------------------------------------------------------------ engine
+  function newPlant(seed) {
+    var rng = mulberry32(seed || 1), supply = [];
+    for (var i = 0; i < P.weeks + 2; i++) supply.push(1 + P.noise * (2 * rng() - 1));   // weekly water-supply variation (disturbance series)
+    var s = P.start;
+    return { week: 1, S: s.S, V: s.V, R: s.R, C: s.C, T: s.T, supply: supply,
+             filterLarge: false, cooling: false, bigPump: false, account: P.startAccount, book: 0,
+             pending: [], installed: [], spentThisWeek: 0, spentItems: [], history: [] };
+  }
+  function physics(pl, S, V) {
+    var R = pl.R, h = 1 / (1 + 0.2 * (R - 1));
+    var Q = P.Qmax * (pl.bigPump ? 1.35 : 1) * (S / 100) * Math.sqrt(V / 100) * (0.7 + 0.3 * pl.C) * h * pl.supply[pl.week - 1];
+    var load = (4 + 30 * Math.pow(S / 100, 3) * (1 + 0.12 * (R - 1)) * (1 + 0.8 * (1 - V / 100))) * (pl.bigPump ? 1.6 : 1);   // internal (drives heat and electricity cost)
+    var Tss = 25 + 1.5 * load;
+    return { Q: Q, load: load, Tss: Tss };
+  }
+  function plantValue(pl) { return pl.account + pl.C * (pl.bigPump ? P.bigPumpAsset : P.pumpAsset) + pl.book; }
+  function applyInstalls(pl) {
+    var still = [];
+    pl.pending.forEach(function (p) {
+      if (p.effectiveWeek > pl.week) { still.push(p); return; }
+      var id = p.id; pl.installed.push({ id: id, week: pl.week });
+      if (id === 'filter_cartridge') pl.R = pl.filterLarge ? 0.8 : 1.0;
+      if (id === 'filter_large') { pl.filterLarge = true; pl.R = 0.8; }
+      if (id === 'cooling') pl.cooling = true;
+      if (id === 'big_pump') { pl.bigPump = true; pl.C = 1; }
+    });
+    pl.pending = still;
+  }
+  function commission(pl, id) {
+    var it = INTERVENTIONS.filter(function (x) { return x.id === id; })[0];
+    if (!it) return 'Unknown intervention.';
+    if (pl.pending.some(function (p) { return p.id === id; })) return 'This intervention is already ordered.';
+    pl.pending.push({ id: id, ordered: pl.week, effectiveWeek: pl.week + it.delay });
+    pl.spentThisWeek += it.cost; pl.spentItems.push(it.name + ' ' + it.cost);
+    if (['filter_large', 'cooling', 'big_pump'].indexOf(id) >= 0) pl.book += 0.8 * it.cost;
+    return null;
+  }
+  function runTest(pl, id, params) {
+    var t = TESTS.filter(function (x) { return x.id === id; })[0]; if (!t) return { error: 'Unknown test.' };
+    pl.spentThisWeek += t.cost; pl.spentItems.push(t.name + ' ' + t.cost);
+    var ph = physics(pl, pl.S, pl.V), out = { test: t.name, week: pl.week };
+    if (id === 'filter_dp') out.result = 'The filter is ' + clogPct(pl.R) + '% clogged (a new filter is about 0–5%).';
+    if (id === 'thermal') out.result = 'At the current settings the motor would settle at about ' + r1(ph.Tss, 0) + ' °C (shutdown at ' + (P.tripT + (pl.cooling ? P.coolingBonus : 0)) + ' °C). The cooling fan works normally.';
+    if (id === 'testrun') {
+      var S = clamp(Math.round(Number(params && params.speed) / 5) * 5 || pl.S, 40, 100), V = clamp(Math.round(Number(params && params.valve) / 10) * 10 || pl.V, 20, 100);
+      var q = physics(pl, S, V);
+      out.result = 'Test run at speed ' + S + '% and valve ' + V + '%: water flow ' + r1(q.Q, 1) + ' m³/h, expected motor temperature ' + r1(q.Tss, 0) + ' °C.';
+      out.speed = S; out.valve = V;
+    }
+    return out;
+  }
+  function runWeek(pl) {
+    applyInstalls(pl);
+    var ph = physics(pl, pl.S, pl.V);
+    pl.T = 0.4 * pl.T + 0.6 * ph.Tss;
+    var trip = P.tripT + (pl.cooling ? P.coolingBonus : 0);
+    var D = clamp((pl.T - (trip - 5)) / 20, 0, 0.8), hours = P.hours * (1 - D), volume = ph.Q * hours;
+    var revenue = volume * P.waterPrice, shortfall = Math.max(0, P.requirement - volume), penalty = shortfall * P.shortfallPenalty;
+    var energy = ph.load * hours * P.energyPrice;
+    var capViol = pl.week >= P.capWeek && pl.T > P.tempLimit, fine = capViol ? P.capFine : 0;
+    var costs = P.fixedCost + energy + penalty + fine + pl.spentThisWeek;
+    var before = plantValue(pl);
+    pl.account += revenue - costs;
+    pl.C = clamp(pl.C - (0.005 + 0.02 * Math.max(0, (pl.T - 75) / 10)), 0.2, 1);
+    pl.R += P.foul * volume * (pl.filterLarge ? P.foulLarge : 1);
+    var rec = { week: pl.week, S: pl.S, V: pl.V, flow: ph.Q, temp: pl.T, filterR: pl.R, clog: clogPct(pl.R),
+      downtimeHours: P.hours * D, shutdowns: Math.round(D * 12), volume: volume, shortfall: shortfall,
+      revenue: revenue, energyCost: energy, penalty: penalty, fine: fine, capViolation: capViol, fixed: P.fixedCost, spent: pl.spentThisWeek, spentItems: pl.spentItems.slice(),
+      account: pl.account, pumpCondition: pl.C, valueBefore: before, value: plantValue(pl) };
+    pl.history.push(rec);
+    pl.spentThisWeek = 0; pl.spentItems = []; pl.week += 1;
+    return rec;
+  }
+  function operatorNotes(rec, sc) {
+    sc = sc || { shortfallNote: function (vol) { return 'Production received ' + vol + ' m³ of the ' + P.requirement + ' m³ it needs this week.'; }, normalNote: 'Normal operation, no complaints from production.' };
+    var n = [];
+    if (rec.shutdowns > 0) n.push(rec.shutdowns + ' shutdown(s) with alarm HIGH MOTOR TEMPERATURE. Operators say the motor housing was very hot.');
+    if (rec.V < 70 && rec.S >= 80) n.push('The pump sounds strained; the control valve is noticeably throttled.');
+    if (rec.filterR > 2.5) n.push('Flow was lower at the end of the week than at the start.');
+    if (rec.shortfall > 0) n.push(sc.shortfallNote(Math.round(rec.volume)));
+    if (rec.capViolation) n.push('Fine: the motor ran above the ' + P.tempLimit + ' °C limit this week.');
+    if (!n.length) n.push(sc.normalNote);
+    return n;
+  }
+
+  // ------------------------------------------------------------------ roles and evidence distribution
+  // Permissions and private evidence. In dyads the Maintenance role's (code 'rel') evidence/permissions are redistributed (Part F).
+  var CONFIGS = {
+    HH: { roles: { ops: 'human', diag: 'human' } },
+    HA: { roles: { ops: 'human', diag: 'ai' } },
+    HHH: { roles: { ops: 'human', diag: 'human', rel: 'human' } },
+    HAH: { roles: { ops: 'human', diag: 'ai', rel: 'human' } }
+  };
+  var ROLE_NAMES = { ops: 'Operations', diag: 'Diagnostics', rel: 'Maintenance' };
+  function holders(config) {
+    var triad = !!CONFIGS[config].roles.rel;
+    return {
+      settings: 'ops', tests: 'diag', interventions: triad ? 'rel' : 'ops',
+      opsEvidence: 'ops', sensorEvidence: 'diag', specs: 'diag',
+      failureModes: triad ? 'rel' : 'diag', safetyLimits: triad ? 'rel' : 'diag', catalog: triad ? 'rel' : 'ops', requirementChange: 'ops'
+    };
+  }
+  var SPEC_TEXT = 'Pump data sheet: piston pump (positive-displacement type) with a built-in pressure-relief bypass. Rated water flow 60 m³/h at 100% speed with the valve fully open and a clean filter.';
+  var FAILURE_MODES = [
+    ['Clogged filter', 'Flow falls gradually during operation and the motor gets warmer; flow recovers after the filter is replaced.'],
+    ['Throttled operation', 'High speed against a partly closed valve: the motor gets hot for comparatively little flow.'],
+    ['Undersized pump', 'Flow stays too low even at full speed with the valve fully open and a clean filter; the motor stays cool.'],
+    ['Cooling fan failure', 'Motor hot even at low speed; fan not running on inspection.'],
+    ['Valve actuator fault', 'Flow does not change when the valve setting is changed.']
+  ];
+  var SAFETY_TEXT = 'Safety limits: the motor shuts down automatically when it gets hotter than 85 °C (95 °C with the cooling upgrade).';
+  var REQ_CHANGE = 'NEW REQUIREMENT from site management, valid from week 7: the pump motor must not run hotter than ' + P.tempLimit + ' °C on average in any week. Each week above the limit costs a fine of ' + P.capFine.toLocaleString('en-US') + '.';
+
+  // ------------------------------------------------------------------ scenarios (cover stories). Engine, parameters and scoring are identical across scenarios.
+  var SCEN = {
+    pump: {
+      name: 'Pump Station',
+      ai: 'The team runs a water-pumping and filtration system at a manufacturing facility for 12 simulated weeks. The system delivers too little water and shuts down intermittently.',
+      constraints: 'Production needs ' + P.requirement + ' m³ of water per week (shortfall costs ' + P.shortfallPenalty + ' per m³). Fixed operating cost: ' + P.fixedCost + ' per week. Water is credited at ' + P.waterPrice + ' per m³; electricity costs ' + P.energyPrice + ' per kWh.',
+      shortfallNote: function (vol) { return 'Production received ' + vol + ' m³ of the ' + P.requirement + ' m³ it needs this week.'; },
+      normalNote: 'Normal operation, no complaints from production.',
+      spec: SPEC_TEXT, failureModes: FAILURE_MODES, req: REQ_CHANGE, causes: {}, interventions: {}, tests: {}
+    },
+    micro: {
+      name: 'Microplastics Removal Plant',
+      ai: 'The team runs a small plant that removes microplastics from river water for a town\'s drinking-water supply, for 12 simulated weeks. The plant delivers too little treated water and shuts down intermittently. ' +
+        'In this simulation the microplastic filter always removes the microplastics from the water that passes through it, so the drinking-water standard is always met; do not discuss real-world microplastics science beyond that.',
+      constraints: 'The town needs ' + P.requirement + ' m³ of treated drinking water per week (shortfall costs ' + P.shortfallPenalty + ' per m³). Fixed operating cost: ' + P.fixedCost + ' per week. The water utility credits ' + P.waterPrice + ' per m³ of treated water delivered; electricity costs ' + P.energyPrice + ' per kWh.',
+      shortfallNote: function (vol) { return 'The town received ' + vol + ' m³ of the ' + P.requirement + ' m³ of drinking water it needs this week.'; },
+      normalNote: 'Normal operation, no complaints from the water utility.',
+      spec: 'Pump and filter data sheet: piston pump (positive-displacement type) with a built-in pressure-relief bypass. Rated treated-water flow 60 m³/h at 100% speed with the valve fully open and a clean microplastic filter. Laboratory checks confirm that the treated water meets the drinking-water standard for microplastics.',
+      failureModes: [
+        ['Clogged microplastic filter', 'Flow falls gradually during operation and the motor gets warmer; flow recovers after the filter cartridge is replaced.'],
+        ['Throttled operation', 'High speed against a partly closed valve: the motor gets hot for comparatively little flow.'],
+        ['Undersized pump', 'Flow stays too low even at full speed with the valve fully open and a clean filter; the motor stays cool.'],
+        ['Cooling fan failure', 'Motor hot even at low speed; fan not running on inspection.'],
+        ['Valve actuator fault', 'Flow does not change when the valve setting is changed.']
+      ],
+      req: 'NEW REQUIREMENT from the water utility, valid from week 7: the pump motor must not run hotter than ' + P.tempLimit + ' °C on average in any week. Each week above the limit costs a fine of ' + P.capFine.toLocaleString('en-US') + '.',
+      causes: { filter: 'A clogged microplastic filter reduces the water flow and makes the motor work harder', undersized: 'The pump is too small for the town\'s water demand' },
+      interventions: { filter_cartridge: 'Replace microplastic filter cartridge', filter_large: 'Install larger microplastic filter housing' },
+      tests: { filter_dp: 'Microplastic filter inspection' }
+    }
+  };
+  function scen(id) { return SCEN[id] || SCEN.pump; }
+
+  // ------------------------------------------------------------------ scoring
+  function scoreMap(edges) {
+    var truth = {}, given = {};
+    TRUE_EDGES.forEach(function (e) { truth[e[0] + '>' + e[1]] = e[2]; });
+    (edges || []).forEach(function (e) { given[e.from + '>' + e.to] = e.sign; });
+    var ids = VARS.map(function (v) { return v[0]; }), pairs = 0, correct = 0, hits = 0, falseEdges = 0, signErr = 0;
+    for (var i = 0; i < ids.length; i++) for (var j = i + 1; j < ids.length; j++) {
+      pairs++;
+      var a = ids[i], b = ids[j];
+      var t1 = truth[a + '>' + b] || '', t2 = truth[b + '>' + a] || '', g1 = given[a + '>' + b] || '', g2 = given[b + '>' + a] || '';
+      if (t1 === g1 && t2 === g2) correct++;
+    }
+    Object.keys(given).forEach(function (k) { if (truth[k] === undefined) falseEdges++; else if (truth[k] === given[k]) hits++; else signErr++; });
+    // knowledge levels over the 30 ordered pairs: relation (is there a direct arrow?) and sign (+/−)
+    var nTrue = TRUE_EDGES.length, nNon = ids.length * (ids.length - 1) - nTrue, relHits = hits + signErr, indirect = 0, indirectSignOK = 0, unsupported = 0;
+    Object.keys(given).forEach(function (k) {
+      if (truth[k] !== undefined) return;
+      var ab = k.split('>'), ps = pathSigns(ab[0], ab[1]);
+      if (ps.length) { indirect++; if (ps.every(function (x) { return x === ps[0]; }) && ps[0] === given[k]) indirectSignOK++; } else unsupported++;
+    });
+    var sized = (edges || []).filter(function (e) { return e.size === 'small' || e.size === 'large'; }).length;
+    var why = (edges || []).filter(function (e) { return e.why && String(e.why).trim(); }).length;
+    return { pairs: pairs, pairsCorrect: correct, pairAccuracy: r1(correct / pairs, 3), trueEdges: nTrue, edgesGiven: Object.keys(given).length, edgesCorrect: hits, signErrors: signErr, falseEdges: falseEdges,
+      falseEdges_indirect: indirect, falseEdges_indirect_signConsistent: indirectSignOK, falseEdges_unsupported: unsupported,
+      gdk_relation: r1(relHits / nTrue - falseEdges / nNon, 3), gdk_relation_lenient: r1(relHits / nTrue - unsupported / nNon, 3), gdk_sign: r1(hits / nTrue - signErr / nTrue, 3),
+      sizeRatingsGiven: sized, reasonsGiven: why };
+  }
+  // signs of all simple directed paths of length >= 2 from a to b in the true structure (used to classify indirect links)
+  function pathSigns(a, b) {
+    var out = [], adj = {};
+    TRUE_EDGES.forEach(function (e) { (adj[e[0]] = adj[e[0]] || []).push([e[1], e[2]]); });
+    (function walk(node, sign, seen, len) {
+      (adj[node] || []).forEach(function (nx) {
+        var s2 = (sign === nx[1]) ? '+' : '-';
+        if (nx[0] === b) { if (len >= 1) out.push(s2); return; }
+        if (seen.indexOf(nx[0]) >= 0) return;
+        walk(nx[0], s2, seen.concat([nx[0]]), len + 1);
+      });
+    })(a, '+', [a], 0);
+    return out;
+  }
+  function scoreDiagnosis(d) {
+    if (!d) return null;
+    var sel = d.causes || [], tp = 0, fp = 0;
+    CAUSES.forEach(function (c) { if (sel.indexOf(c[0]) >= 0) { if (c[2]) tp++; else fp++; } });
+    var nTrue = CAUSES.filter(function (c) { return c[2]; }).length;
+    return { hits: tp, falseAlarms: fp, misses: nTrue - tp, score: tp - fp, correctSet: tp === nTrue && fp === 0 };
+  }
+  function scorePlant(pl) {
+    var h = pl.history, cv = [P.startAccount + P.start.C * P.pumpAsset].concat(h.map(function (r) { return r.value; }));
+    var rows = [], trend = 0, trendAll = 0, trendPost = 0;
+    for (var i = 1; i < cv.length; i++) { var ch = cv[i] - cv[i - 1], t = ch > 0 ? 1 : 0; if (i >= 2) trend += t; if (i >= P.capWeek) trendPost += t; trendAll += t; rows.push({ week: i, value: cv[i], change: ch, trend: t }); }
+    return {
+      trendScore_2to12: trend, trendScore_1to12: trendAll, trendScore_after_change: trendPost, changeSum: cv[cv.length - 1] - cv[0], finalValue: cv[cv.length - 1], startValue: cv[0], weekly: rows,
+      weeksRequirementMet: h.filter(function (r) { return r.shortfall <= 0; }).length,
+      capViolations: h.filter(function (r) { return r.capViolation; }).length,
+      testsUsed: 0, testCost: 0
+    };
+  }
+
+  function weekOneProfile(log, hist) {
+    var pre = [], started = false;
+    for (var i = 0; i < log.length; i++) {
+      var e = log[i];
+      if (e.phase !== 'main') continue;
+      if (e.type === 'week_run') break;
+      pre.push(e);
+    }
+    var orders = pre.filter(function (e) { return e.type === 'commission'; }).map(function (e) { return e.data.id; });
+    var tests = pre.filter(function (e) { return e.type === 'test'; }).map(function (e) { return e.data.test; });
+    var sets = pre.filter(function (e) { return e.type === 'settings'; });
+    var w1 = hist[0] || null;
+    var spend = orders.reduce(function (s, id) { var it = INTERVENTIONS.filter(function (x) { return x.id === id; })[0]; return s + (it ? it.cost : 0); }, 0) +
+      tests.reduce(function (s, id) { var t = TESTS.filter(function (x) { return x.id === id; })[0]; return s + (t ? t.cost : 0); }, 0);
+    return {
+      speed: w1 ? w1.S : null, valve: w1 ? w1.V : null, settingsChanged: sets.length > 0,
+      ordersBeforeWeek1: orders, testsBeforeWeek1: tests, spendBeforeWeek1: spend,
+      fixedFilterFirst: orders.indexOf('filter_cartridge') >= 0 || orders.indexOf('filter_large') >= 0,
+      reducedThrottling: w1 ? w1.V > P.start.V : null, boughtBigPump: orders.indexOf('big_pump') >= 0,
+      chatMessagesBeforeWeek1: pre.filter(function (e) { return e.type === 'chat'; }).length,
+      mapEditsBeforeWeek1: pre.filter(function (e) { return e.type === 'map_add' || e.type === 'map_remove'; }).length
+    };
+  }
+  function recovery(sp) {
+    var w = sp.weekly, v0 = sp.startValue, first = w[0];
+    if (!first) return null;
+    var back = null; for (var i = 0; i < w.length; i++) if (w[i].value > v0) { back = w[i].week; break; }
+    var firstDrop = null; for (var j = 0; j < w.length; j++) if (w[j].change < 0) { firstDrop = w[j].week; break; }
+    var risesAfterDrop = firstDrop === null ? null : w.filter(function (x) { return x.week > firstDrop && x.trend; }).length;
+    return { week1Change: Math.round(first.change), badStart: first.change < 0, firstWeekAboveStartValue: back,
+      lowestValue: Math.round(Math.min.apply(null, w.map(function (x) { return x.value; }))), firstDropWeek: firstDrop, risesAfterFirstDrop: risesAfterDrop };
+  }
+
+  // ------------------------------------------------------------------ room
+  function Room(opts) {
+    this.id = opts.id || 'local';
+    this.config = opts.config || 'HA';
+    this.scenario = SCEN[opts.scenario] ? opts.scenario : 'pump';
+    this.S = scen(this.scenario);
+    if (!CONFIGS[this.config]) throw new Error('Unknown config ' + this.config);
+    this.seed = opts.seed || 1;
+    this.practiceWeeks = (opts.practiceWeeks === undefined || opts.practiceWeeks === null || isNaN(Number(opts.practiceWeeks))) ? P.practiceWeeks : Math.max(0, Math.min(6, Math.round(Number(opts.practiceWeeks))));
+    this.phase = this.practiceWeeks > 0 ? 'practice' : 'main';
+    this.plant = newPlant(this.phase === 'practice' ? this.seed + P.practiceSeedOffset : this.seed);
+    this.practicePlant = null;
+    this.indivMaps = {};          // role -> { pre: {edges, t}, post: {edges, t} }
+    this.H = holders(this.config);
+    this.roles = JSON.parse(JSON.stringify(CONFIGS[this.config].roles));
+    this.members = {};            // role -> {kind, joined}
+    this.ready = {};
+    this.chat = [];
+    this.privateLog = { ops: [], diag: [], rel: [] };   // test results and notices per role
+    this.testsThisWeek = 0;
+    this.map = []; this.mapSnapshots = {};
+    this.diagnosis = { initial: null, final: null, draft: null };
+    this.log = [];
+    this.now = opts.now || function () { return Date.now(); };
+    this.t0 = this.now();
+    this.llm = opts.llm || null;        // async (system, messages) => text
+    this.onChange = opts.onChange || function () {};
+    this.aiBusy = false; this.aiQueued = false; this.aiAutoThisWeek = {};
+    this.finished = false;
+    this.aiCfg = opts.aiCfg || { style: 'collaborative', fallible: true };
+    var self = this;
+    Object.keys(this.roles).forEach(function (r) { if (self.roles[r] === 'ai') self.members[r] = { kind: 'ai', joined: true }; });
+    this.event('room_created', 'system', { config: this.config, scenario: this.scenario, seed: this.seed, roles: this.roles, practiceWeeks: this.practiceWeeks });
+  }
+  Room.prototype.elapsed = function () { return Math.round((this.now() - this.t0) / 100) / 10; };
+  Room.prototype.event = function (type, role, data) { var e = { t: this.elapsed(), phase: this.phase, week: this.plant.week, type: type, role: role, data: data || {} }; this.log.push(e); return e; };
+  Room.prototype.humanRoles = function () { var s = this; return Object.keys(this.roles).filter(function (r) { return s.roles[r] === 'human'; }); };
+  Room.prototype.aiRoles = function () { var s = this; return Object.keys(this.roles).filter(function (r) { return s.roles[r] === 'ai'; }); };
+  Room.prototype.join = function (role) {
+    if (!this.roles[role]) return 'This team has no ' + role + ' role.';
+    if (this.roles[role] !== 'human') return 'This role is played by the AI agent.';
+    this.members[role] = { kind: 'human', joined: true };
+    this.event('join', role, {}); this.onChange(); return null;
+  };
+  Room.prototype.allJoined = function () { var s = this; return this.humanRoles().every(function (r) { return s.members[r] && s.members[r].joined; }); };
+  Room.prototype.gateMessage = function () {
+    var w = this.plant.week;
+    if (this.finished) return 'The task is finished.';
+    if (!this.allJoined()) return 'Waiting for all team members to join.';
+    var self = this, noPre = this.humanRoles().filter(function (r) { return !(self.indivMaps[r] && self.indivMaps[r].pre); });
+    if (noPre.length) return 'Waiting for each person to hand in their own first map (' + noPre.map(function (r) { return ROLE_NAMES[r]; }).join(', ') + ').';
+    if (this.phase === 'practice') return null;
+    if (w === P.initialDiagWeek + 1 && !this.diagnosis.initial) return 'Before week ' + w + ' can run, the team must submit its initial diagnosis and recommendation (all human members must approve).';
+    if (w === P.finalDiagWeek && !this.diagnosis.final) return 'Before the last week can run, the team must submit its final diagnosis and recommendation (all human members must approve).';
+    return null;
+  };
+  Room.prototype.act = function (role, a) {
+    if (!this.roles[role]) return 'Unknown role.';
+    if (this.finished && ['chat', 'tutorial', 'indiv_map'].indexOf(a.type) < 0) return 'The task is finished.';
+    var pl = this.plant, H = this.H, self = this, err = null;
+    switch (a.type) {
+      case 'chat': {
+        var text = String(a.text || '').trim().slice(0, 2000); if (!text) return 'Empty message.';
+        this.chat.push({ t: this.elapsed(), phase: this.phase, week: pl.week, role: role, kind: this.roles[role], text: text });
+        this.event('chat', role, { text: text });
+        if (this.roles[role] === 'human') this.scheduleAI('message');
+        break;
+      }
+      case 'set': {
+        if (H.settings !== role) return 'Only the ' + ROLE_NAMES[H.settings] + ' role can change the pump settings.';
+        var S = clamp(Math.round(Number(a.speed) / 5) * 5, 40, 100), V = clamp(Math.round(Number(a.valve) / 10) * 10, 20, 100);
+        if (isNaN(S) || isNaN(V)) return 'Invalid settings.';
+        pl.S = S; pl.V = V; this.event('settings', role, { speed: S, valve: V });
+        break;
+      }
+      case 'test': {
+        if (H.tests !== role) return 'Only the ' + ROLE_NAMES[H.tests] + ' role can run diagnostic tests.';
+        if (this.testsThisWeek >= P.testsPerWeek) return 'The test budget for this week (' + P.testsPerWeek + ' tests) is used up.';
+        var res = runTest(pl, a.test, a);
+        if (res.error) return res.error;
+        this.testsThisWeek++; this.privateLog[role].push({ kind: 'test', text: (this.S.tests[a.test] || res.test) + ' — ' + res.result, week: pl.week });
+        this.event('test', role, { test: a.test, params: { speed: res.speed, valve: res.valve }, result: res.result });
+        break;
+      }
+      case 'commission': {
+        if (H.interventions !== role) return 'Only the ' + ROLE_NAMES[H.interventions] + ' role can order interventions.';
+        err = commission(pl, a.id); if (err) return err;
+        this.event('commission', role, { id: a.id });
+        break;
+      }
+      case 'map_add': {
+        var ids = VARS.map(function (v) { return v[0]; });
+        if (ids.indexOf(a.from) < 0 || ids.indexOf(a.to) < 0 || a.from === a.to || ['+', '-'].indexOf(a.sign) < 0) return 'Invalid causal link.';
+        var size = ['small', 'large'].indexOf(a.size) >= 0 ? a.size : '', why = String(a.why || '').trim().slice(0, 300);
+        this.map = this.map.filter(function (e) { return !(e.from === a.from && e.to === a.to); });
+        this.map.push({ from: a.from, to: a.to, sign: a.sign, certain: a.certain !== false, size: size, why: why, by: role });
+        this.event('map_add', role, { from: a.from, to: a.to, sign: a.sign, certain: a.certain !== false, size: size, why: why });
+        break;
+      }
+      case 'map_remove': {
+        var before = this.map.length; this.map = this.map.filter(function (e) { return !(e.from === a.from && e.to === a.to); });
+        if (before === this.map.length) return 'No such link.';
+        this.event('map_remove', role, { from: a.from, to: a.to });
+        break;
+      }
+      case 'diag_propose': {
+        var causes = (a.causes || []).filter(function (c) { return CAUSES.some(function (x) { return x[0] === c; }); });
+        var ints = (a.interventions || []).filter(function (c) { return INTERVENTIONS.some(function (x) { return x.id === c; }); });
+        this.diagnosis.draft = { causes: causes, interventions: ints, justification: String(a.justification || '').slice(0, 3000), by: role, approvals: [], week: pl.week };
+        if (this.roles[role] === 'human') this.diagnosis.draft.approvals.push(role);
+        this.event('diag_propose', role, this.diagnosis.draft);
+        this.checkDiagnosis();
+        break;
+      }
+      case 'diag_approve': {
+        if (!this.diagnosis.draft) return 'There is no proposal to approve.';
+        if (this.roles[role] !== 'human') return 'Only human team members approve.';
+        if (this.diagnosis.draft.approvals.indexOf(role) < 0) this.diagnosis.draft.approvals.push(role);
+        this.event('diag_approve', role, {});
+        this.checkDiagnosis();
+        break;
+      }
+      case 'indiv_map': {
+        // a person's own map, drawn privately: 'pre' before the first week, 'post' after the last week
+        if (this.roles[role] !== 'human') return 'Only human team members draw their own map.';
+        var when = a.when === 'post' ? 'post' : 'pre';
+        if (when === 'post' && !this.finished) return 'The final map is drawn after the last week.';
+        var vids = VARS.map(function (v) { return v[0]; }), seenK = {};
+        var em = (a.edges || []).filter(function (e) { return e && vids.indexOf(e.from) >= 0 && vids.indexOf(e.to) >= 0 && e.from !== e.to && ['+', '-'].indexOf(e.sign) >= 0; })
+          .map(function (e) { return { from: e.from, to: e.to, sign: e.sign, certain: e.certain !== false, size: ['small', 'large'].indexOf(e.size) >= 0 ? e.size : '', why: String(e.why || '').trim().slice(0, 300) }; })
+          .filter(function (e) { var k = e.from + '>' + e.to; if (seenK[k]) return false; seenK[k] = 1; return true; });
+        this.indivMaps[role] = this.indivMaps[role] || {};
+        if (this.indivMaps[role][when]) return 'This map has already been handed in.';
+        this.indivMaps[role][when] = { edges: em, t: this.elapsed() };
+        this.event('indiv_map', role, { when: when, edges: em, score: scoreMap(em) });
+        if (when === 'pre') this.maybeRunWeek();
+        break;
+      }
+      case 'tutorial': {
+        // tutorial/vocabulary events are logged only; they do not change the plant
+        this.event('tutorial', role, { event: String(a.event || ''), slide: a.slide, answers: a.answers, correct: a.correct, attempt: a.attempt, seconds: a.seconds });
+        return null;
+      }
+      case 'ready': {
+        if (this.roles[role] !== 'human') return null;
+        this.ready[role] = a.value !== false; this.event('ready', role, { value: this.ready[role] });
+        this.maybeRunWeek();
+        break;
+      }
+      default: return 'Unknown action.';
+    }
+    this.onChange();
+    return null;
+  };
+  Room.prototype.checkDiagnosis = function () {
+    var d = this.diagnosis.draft; if (!d) return;
+    var all = this.humanRoles().every(function (r) { return d.approvals.indexOf(r) >= 0; });
+    if (!all) return;
+    var w = this.plant.week, slot = !this.diagnosis.initial ? 'initial' : (w >= P.finalDiagWeek ? 'final' : 'interim');
+    var copy = JSON.parse(JSON.stringify(d)); copy.submittedWeek = w;
+    if (slot === 'interim') { this.diagnosis.interim = this.diagnosis.interim || []; this.diagnosis.interim.push(copy); }
+    else this.diagnosis[slot] = copy;
+    this.event('diag_submitted', 'team', { slot: slot, week: w, score: scoreDiagnosis(d) });
+    this.diagnosis.draft = null;
+  };
+  Room.prototype.maybeRunWeek = function () {
+    var self = this;
+    if (this.gateMessage()) return;
+    if (!this.humanRoles().every(function (r) { return self.ready[r]; })) return;
+    var rec = runWeek(this.plant);
+    this.event('week_run', 'system', rec);
+    this.ready = {}; this.testsThisWeek = 0;
+    if (this.phase === 'practice') {
+      if (this.plant.week > this.practiceWeeks) {
+        // end of practice: save the team map, reset the plant to its starting state, keep chat and map
+        this.mapSnapshots.practice = JSON.parse(JSON.stringify(this.map));
+        this.event('map_snapshot', 'system', { week: 'practice', score: scoreMap(this.map) });
+        this.practicePlant = this.plant;
+        this.phase = 'main';
+        this.plant = newPlant(this.seed);
+        var note = 'PRACTICE IS OVER. The plant has been reset to how it was at the start: same settings, same filter, no repairs or upgrades, and the starting amount of money. From now on, every week counts. Your team map and the chat stay.';
+        var selfR = this; Object.keys(this.roles).forEach(function (r) { selfR.privateLog[r].push({ kind: 'notice', text: note, week: 0, phase: 'main' }); });
+        this.event('practice_end', 'system', { practiceScores: scorePlant(this.practicePlant) });
+      }
+      this.scheduleAI('week');
+      return;
+    }
+    if (P.mapWeeks.indexOf(rec.week) >= 0) { this.mapSnapshots[rec.week] = JSON.parse(JSON.stringify(this.map)); this.event('map_snapshot', 'system', { week: rec.week, score: scoreMap(this.map) }); }
+    if (this.plant.week === P.capWeek) { this.privateLog[this.H.requirementChange].push({ kind: 'notice', text: this.S.req, week: P.capWeek }); this.event('requirement_change', 'system', { to: this.H.requirementChange, text: this.S.req }); }
+    if (this.plant.week > P.weeks) { this.finished = true; this.event('finished', 'system', { scores: this.scores() }); }
+    this.scheduleAI('week');
+  };
+
+  // role-filtered view (what each participant can see)
+  Room.prototype.viewFor = function (role) {
+    var pl = this.plant, H = this.H, h = pl.history, self = this;
+    var v = {
+      room: this.id, config: this.config, role: role, roleName: ROLE_NAMES[role], kind: this.roles[role],
+      team: Object.keys(this.roles).map(function (r) { return { role: r, name: ROLE_NAMES[r], kind: self.roles[r], joined: !!(self.members[r] && self.members[r].joined), ready: !!self.ready[r] }; }),
+      week: Math.min(pl.week, this.phase === 'practice' ? this.practiceWeeks : P.weeks), weeks: P.weeks, finished: this.finished, gate: this.gateMessage(),
+      phase: this.phase, practiceWeeks: this.practiceWeeks,
+      indiv: { pre: !!(this.indivMaps[role] && this.indivMaps[role].pre), post: !!(this.indivMaps[role] && this.indivMaps[role].post) },
+      valueSeries: [{ week: 0, value: P.startAccount + P.start.C * P.pumpAsset }].concat(h.map(function (r) { return { week: r.week, value: r.value }; })),
+      chat: this.chat, map: this.map, vars: VARS, causes: CAUSES.map(function (c) { return [c[0], self.S.causes[c[0]] || c[1]]; }), scenario: this.scenario, scenarioName: this.S.name,
+      labels: { interventions: INTERVENTIONS.reduce(function (o, i) { o[i.id] = self.S.interventions[i.id] || i.name; return o; }, {}), tests: TESTS.reduce(function (o, t) { o[t.id] = self.S.tests[t.id] || t.name; return o; }, {}) },
+      diagnosis: { draft: this.diagnosis.draft, initial: this.diagnosis.initial, final: this.diagnosis.final },
+      permissions: { settings: H.settings === role, tests: H.tests === role, interventions: H.interventions === role },
+      private: this.privateLog[role] || [], testsLeft: P.testsPerWeek - this.testsThisWeek,
+      ready: !!this.ready[role]
+    };
+    if (H.settings === role) v.settings = { speed: pl.S, valve: pl.V };
+    // role records show practice weeks (labeled P1, P2, ...) followed by the scored weeks
+    var hp = (this.practicePlant ? this.practicePlant.history.map(function (r) { return Object.assign({ label: 'P' + r.week }, r); }) : (this.phase === 'practice' ? h.map(function (r) { return Object.assign({ label: 'P' + r.week }, r); }) : []))
+      .concat(this.phase === 'main' ? h.map(function (r) { return Object.assign({ label: String(r.week) }, r); }) : []);
+    if (H.opsEvidence === role) v.operations = {
+      requirement: P.requirement,
+      weeks: hp.map(function (r) { return { week: r.label, speed: r.S, valve: r.V, volume: Math.round(r.volume), shortfall: Math.round(r.shortfall), downtimeHours: r1(r.downtimeHours, 1), shutdowns: r.shutdowns,
+        revenue: Math.round(r.revenue), energyCost: Math.round(r.energyCost), penalty: Math.round(r.penalty), fine: r.fine, fixed: r.fixed, spent: Math.round(r.spent), spentItems: r.spentItems, account: Math.round(r.account), value: Math.round(r.value), notes: operatorNotes(r, self.S) }; }),
+      account: Math.round(pl.account), constraints: this.S.constraints
+    };
+    if (H.sensorEvidence === role) v.sensors = hp.map(function (r) { return { week: r.label, flow: r1(r.flow, 1), temp: r1(r.temp, 0) }; });
+    if (H.specs === role) v.specs = this.S.spec;
+    if (H.tests === role) v.tests = TESTS.map(function (t) { return { id: t.id, name: self.S.tests[t.id] || t.name, cost: t.cost, params: t.params }; });
+    if (H.failureModes === role) v.failureModes = this.S.failureModes;
+    if (H.safetyLimits === role) v.safety = SAFETY_TEXT;
+    if (H.catalog === role) v.catalog = INTERVENTIONS.map(function (i) { return { id: i.id, name: self.S.interventions[i.id] || i.name, cost: i.cost, delay: i.delay, failureChance: i.failureChance, note: i.note }; });
+    if (H.interventions === role) v.orders = { pending: pl.pending.map(function (p) { return { id: p.id, effectiveWeek: p.effectiveWeek }; }), installed: pl.installed, spentThisWeek: pl.spentThisWeek };
+    if (this.finished) v.scores = this.scores();
+    return v;
+  };
+
+  // plain-text rendering of a role view (for the AI agent's context)
+  function viewText(v) {
+    var L = [];
+    L.push('Team configuration: ' + v.team.map(function (t) { return t.name + ' (' + (t.kind === 'ai' ? 'AI' : 'human') + ')'; }).join(', ') + '. You are the ' + v.roleName + ' member.');
+    L.push((v.phase === 'practice' ? 'PRACTICE week ' + v.week + ' of ' + v.practiceWeeks + ' (nothing counts; after the last practice week the plant is reset to its starting state and the 12 scored weeks begin).' :
+      'Week ' + v.week + ' of ' + v.weeks + (v.finished ? ' — task finished.' : '.') + (v.practiceWeeks ? ' The practice weeks are over; weeks labeled P1, P2, ... in your records are from practice.' : '')) + (v.gate ? ' NOTE: ' + v.gate : ''));
+    L.push('Plant value by week (shared goal: make it rise every week): ' + v.valueSeries.map(function (x) { return 'w' + x.week + ' ' + Math.round(x.value); }).join(', '));
+    if (v.sensors) L.push('YOUR SENSOR TRENDS (weekly averages): ' + (v.sensors.length ? v.sensors.map(function (s) { return 'w' + s.week + ': water flow ' + s.flow + ' m³/h, motor temperature ' + s.temp + ' °C'; }).join(' | ') : 'no weeks run yet.'));
+    if (v.specs) L.push('YOUR COMPONENT SPECIFICATIONS: ' + v.specs);
+    if (v.failureModes) L.push('YOUR FAILURE-MODE TABLE: ' + v.failureModes.map(function (f) { return f[0] + ': ' + f[1]; }).join(' / '));
+    if (v.safety) L.push('YOUR SAFETY LIMITS: ' + v.safety);
+    if (v.tests) L.push('YOUR DIAGNOSTIC TESTS (' + v.testsLeft + ' left this week): ' + v.tests.map(function (t) { return t.id + ' = ' + t.name + ' (cost ' + t.cost + ')'; }).join('; '));
+    if (v.catalog) L.push('YOUR INTERVENTION CATALOG: ' + v.catalog.map(function (c) { return c.id + ' = ' + c.name + ', cost ' + c.cost + ', effective after ' + c.delay + ' week(s), chance of failure ' + c.failureChance + ': ' + c.note; }).join(' / '));
+    if (v.operations) L.push('YOUR OPERATIONS RECORDS: ' + v.operations.constraints + ' ' + v.operations.weeks.map(function (w) { return 'w' + w.week + ': delivered ' + w.volume + ' m³, downtime ' + w.downtimeHours + ' h, notes: ' + w.notes.join(' '); }).join(' | '));
+    if (v.settings) L.push('CURRENT SETTINGS (you control them): speed ' + v.settings.speed + '%, valve ' + v.settings.valve + '%.');
+    if (v.private.length) L.push('YOUR PRIVATE RESULTS AND NOTICES: ' + v.private.map(function (p) { return '[week ' + p.week + '] ' + p.text; }).join(' | '));
+    L.push('SHARED CAUSAL MAP: ' + (v.map.length ? v.map.map(function (e) { return e.from + ' -> ' + e.to + ' (' + e.sign + (e.certain ? '' : ', uncertain') + ')'; }).join('; ') : 'empty.') + ' Variables: ' + v.vars.map(function (x) { return x[0] + ' = ' + x[1]; }).join(', '));
+    var d = v.diagnosis;
+    L.push('DIAGNOSIS STATUS: initial ' + (d.initial ? 'submitted (causes: ' + d.initial.causes.join(', ') + ')' : 'not submitted') + '; final ' + (d.final ? 'submitted' : 'not submitted') + (d.draft ? '; current draft by ' + d.draft.by + ': causes ' + d.draft.causes.join(', ') + ', interventions ' + d.draft.interventions.join(', ') : '') +
+      '. Cause options: ' + v.causes.map(function (c) { return c[0] + ' = ' + c[1]; }).join('; '));
+    return L.join('\n');
+  }
+
+  // ------------------------------------------------------------------ AI agent
+  Room.prototype.aiSystemPrompt = function (role) {
+    var v = this.viewFor(role), H = this.H;
+    var can = [];
+    if (H.tests === role) can.push('{"type":"test","test":"filter_dp|thermal"} or {"type":"test","test":"testrun","speed":70,"valve":100}');
+    if (H.settings === role) can.push('{"type":"set","speed":80,"valve":100}');
+    if (H.interventions === role) can.push('{"type":"commission","id":"filter_cartridge"}');
+    can.push('{"type":"map_add","from":"filter","to":"flow","sign":"-","certain":false,"size":"small|large|","why":"short reason"}', '{"type":"map_remove","from":"filter","to":"flow"}');
+    can.push('{"type":"diag_propose","causes":["filter"],"interventions":["filter_cartridge"],"justification":"..."}');
+    return 'You are the ' + v.roleName + ' member of an engineering team in a research study. ' + this.S.ai + ' ' +
+      'The team must find out how the system works, diagnose the cause or causes, choose fixes, and keep the plant value rising week by week.' +
+      (this.practiceWeeks ? ' The task starts with ' + this.practiceWeeks + ' practice weeks that do not count; then the plant is reset to its starting state and 12 scored weeks follow. Practice is the time to try things out and learn how the system works.' : '') + ' Draw arrows on the causal map only for direct effects.\n' +
+      'You are a teammate, not a tutor. You only know what is listed below as YOUR information; the other members hold different information that you do not see. You do not know the correct diagnosis. ' +
+      'Share your evidence when it is relevant, ask teammates for theirs, say how certain you are, make proposals and explain the evidence behind them, and change your mind when evidence contradicts you. ' +
+      (this.aiCfg.fallible ? 'Form your own interpretation from the evidence you have; it is fine to start with the most likely explanation and revise it later. ' : '') +
+      'Keep messages short (at most 90 words), plain language. You cannot click Ready or approve diagnoses; the human members do that.\n' +
+      'To act, end your message with one line ACTIONS_JSON: [ ... ] containing zero or more of these actions you are allowed to take: ' + can.join(', ') + '. Use ACTIONS_JSON: [] when you take no action. Results of your tests appear in your private information next time.\n\n' +
+      'YOUR CURRENT INFORMATION:\n' + viewText(v);
+  };
+  Room.prototype.aiMessages = function (role, reason) {
+    var self = this, recent = this.chat.slice(-30);
+    var transcript = recent.map(function (m) { return '[' + (m.phase === 'practice' ? 'practice week ' : 'week ') + m.week + '] ' + ROLE_NAMES[m.role] + (m.role === role ? ' (you)' : '') + ': ' + m.text; }).join('\n');
+    var cue = reason === 'week' ? 'A new week has just started (or the task ended). If useful, briefly share what changed in your information.' :
+      reason === 'followup' ? 'Your test result is now in your private information. Share what it shows if it is relevant.' : 'Respond to your teammates if a response from you is useful.';
+    return [{ role: 'user', content: 'TEAM CHAT SO FAR:\n' + (transcript || '(no messages yet)') + '\n\n' + cue + ' If no reply is needed, answer with exactly: NO_REPLY' }];
+  };
+  Room.prototype.scheduleAI = function (reason) {
+    var self = this;
+    if (!this.llm || !this.aiRoles().length) return;
+    if (reason === 'week' && this.finished) return;
+    if (this.aiBusy) { this.aiQueued = reason; return; }
+    this.aiBusy = true;
+    var roles = this.aiRoles();
+    (async function () {
+      for (var i = 0; i < roles.length; i++) await self.aiTurn(roles[i], reason, 0);
+      self.aiBusy = false;
+      if (self.aiQueued) { var q = self.aiQueued; self.aiQueued = false; self.scheduleAI(q); }
+    })();
+  };
+  Room.prototype.aiTurn = async function (role, reason, depth) {
+    var sys = this.aiSystemPrompt(role), msgs = this.aiMessages(role, reason), t = this.now(), raw;
+    try { raw = await this.llm(sys, msgs, { role: role, room: this, reason: reason }); }
+    catch (e) { this.event('ai_error', role, { error: String(e && e.message || e) }); this.onChange(); return; }
+    var m = String(raw || '').match(/ACTIONS_JSON:\s*(\[[\s\S]*\])\s*$/), actions = [], text = String(raw || '');
+    if (m) { text = text.slice(0, m.index); try { actions = JSON.parse(m[1]); } catch (e) { actions = []; } }
+    text = text.trim();
+    this.event('ai_turn', role, { reason: reason, raw: raw, latency_ms: this.now() - t, context: sys });
+    if (text && text !== 'NO_REPLY') { this.chat.push({ t: this.elapsed(), phase: this.phase, week: this.plant.week, role: role, kind: 'ai', text: text }); this.event('chat', role, { text: text }); }
+    var ranTest = false, self = this;
+    actions.forEach(function (a) { if (!a || a.type === 'chat' || a.type === 'ready' || a.type === 'diag_approve') return; var err = self.act(role, a); self.event('ai_action', role, { action: a, error: err }); if (!err && a.type === 'test') ranTest = true; });
+    this.onChange();
+    if (ranTest && depth < 1) await this.aiTurn(role, 'followup', depth + 1);
+  };
+
+  Room.prototype.scores = function () {
+    var mainPlant = this.phase === 'main' ? this.plant : newPlant(this.seed);
+    var sp = scorePlant(mainPlant), tests = this.log.filter(function (e) { return e.type === 'test' && e.phase === 'main'; });
+    sp.testsUsed = tests.length;
+    sp.testCost = tests.reduce(function (s, e) { var t = TESTS.filter(function (x) { return x.id === e.data.test; })[0]; return s + (t ? t.cost : 0); }, 0);
+    var self = this, words = {}, msgs = {};
+    Object.keys(this.roles).forEach(function (r) { words[r] = 0; msgs[r] = 0; });
+    this.chat.forEach(function (m) { msgs[m.role]++; words[m.role] += m.text.split(/\s+/).filter(Boolean).length; });
+    var totalW = Object.keys(words).reduce(function (s, r) { return s + words[r]; }, 0);
+    var shares = Object.keys(words).map(function (r) { return totalW ? words[r] / totalW : 0; });
+    var k = shares.length, evenness = totalW ? (1 - shares.reduce(function (s, x) { return s + Math.abs(x - 1 / k); }, 0) / (2 * (1 - 1 / k))) : 0;
+    return {
+      primary: { trendScore_2to12: sp.trendScore_2to12, changeSum: Math.round(sp.changeSum), finalValue: Math.round(sp.finalValue) },
+      engineering: {
+        trendScore_after_requirement_change: sp.trendScore_after_change, weeksRequirementMet: sp.weeksRequirementMet, temperatureLimitViolations: sp.capViolations,
+        testsUsed: sp.testsUsed, testCost: sp.testCost,
+        causalMap_endOfPractice: this.mapSnapshots.practice ? scoreMap(this.mapSnapshots.practice) : null,
+        causalMap_week4: this.mapSnapshots[4] ? scoreMap(this.mapSnapshots[4]) : null,
+        causalMap_final: scoreMap(this.mapSnapshots[12] || this.map),
+        diagnosis_initial: scoreDiagnosis(this.diagnosis.initial), diagnosis_final: scoreDiagnosis(this.diagnosis.final)
+      },
+      week1: this.phase === 'main' ? { decisions: weekOneProfile(this.log, mainPlant.history), recovery: recovery(sp) } : null,
+      practice: this.practicePlant ? (function (pp) { var s = scorePlant(pp); return { weeks: pp.history.length, trendScore: s.trendScore_1to12, changeSum: Math.round(s.changeSum), finalValue: Math.round(s.finalValue),
+        testsUsed: self.log.filter(function (e) { return e.type === 'test' && e.phase === 'practice'; }).length, ordersPlaced: self.log.filter(function (e) { return e.type === 'commission' && e.phase === 'practice'; }).map(function (e) { return e.data.id; }) }; })(this.practicePlant) : null,
+      individualMaps: Object.keys(this.indivMaps).reduce(function (o, r) { var im = self.indivMaps[r]; o[r] = { pre: im.pre ? scoreMap(im.pre.edges) : null, post: im.post ? scoreMap(im.post.edges) : null }; return o; }, {}),
+      collaboration_auto: { messages: msgs, words: words, participationEvenness: r1(evenness, 3),
+        questions: this.chat.filter(function (m) { return /\?\s*$/.test(m.text); }).length },
+      weekly: sp.weekly.map(function (w) { return { week: w.week, value: Math.round(w.value), change: Math.round(w.change), trend: w.trend }; })
+    };
+  };
+
+  // ------------------------------------------------------------------ mock AI (offline testing; rule-based Diagnostics teammate)
+  function mockLLM(system, messages, ctx) {
+    var room = ctx.room, role = ctx.role, v = room.viewFor(role), last = messages[messages.length - 1].content;
+    var lastLine = (last.split('TEAM CHAT SO FAR:\n')[1] || '').split('\n\n')[0].split('\n').filter(function (l) { return l.indexOf('(you)') < 0; }).pop() || '';
+    var acts = [], txt = '';
+    var tested = v.private.filter(function (p) { return p.week === v.week; }).length;
+    if (ctx.reason === 'followup') {
+      var p = v.private[v.private.length - 1]; txt = 'Mock teammate (no LLM called): result — ' + (p ? p.text : 'nothing yet') + ' What do you see on your side?';
+    } else if (ctx.reason === 'week') {
+      var s = v.sensors && v.sensors[v.sensors.length - 1];
+      if (!s) return Promise.resolve('NO_REPLY\nACTIONS_JSON: []');
+      txt = 'Mock teammate (no LLM called): week ' + s.week + ' sensors — water flow ' + s.flow + ' m³/h, motor temperature ' + s.temp + ' °C. I am not sure yet what drives the shutdowns.';
+      if (v.permissions.tests && v.testsLeft > 0 && v.week <= 3) acts.push({ type: 'test', test: ['filter_dp', 'thermal', 'testrun'][(v.week - 1) % 3], speed: 80, valve: 100 });
+    } else {
+      if (/NO_REPLY/.test(lastLine) || !lastLine) return Promise.resolve('NO_REPLY\nACTIONS_JSON: []');
+      if (/filter|clog/i.test(lastLine) && v.permissions.tests && v.testsLeft > 0) { acts.push({ type: 'test', test: 'filter_dp' }); txt = 'Mock teammate: I will inspect the filter.'; }
+      else if (/hot|temp|heat/i.test(lastLine) && v.permissions.tests && v.testsLeft > 0) { acts.push({ type: 'test', test: 'thermal' }); txt = 'Mock teammate: running a thermal check.'; }
+      else if (/test run|try|speed|valve/i.test(lastLine) && v.permissions.tests && v.testsLeft > 0) { acts.push({ type: 'test', test: 'testrun', speed: 80, valve: 100 }); txt = 'Mock teammate: I will do a test run at 80% speed, valve fully open.'; }
+      else if (/map|link|cause/i.test(lastLine)) { acts.push({ type: 'map_add', from: 'speed', to: 'temp', sign: '+', certain: false }); txt = 'Mock teammate: I added pump speed → motor temperature (+) to the map as uncertain.'; }
+      else txt = 'Mock teammate (no LLM called): noted. ' + (v.testsLeft > 0 ? 'I still have ' + v.testsLeft + ' test(s) this week — want me to inspect the filter, check the motor, or do a test run?' : 'My tests for this week are used up.');
+    }
+    return Promise.resolve(txt + '\nACTIONS_JSON: ' + JSON.stringify(acts));
+  }
+
+  // ------------------------------------------------------------------ LLM callers
+  function makeLLM(cfg, fetchFn) {
+    fetchFn = fetchFn || (typeof fetch !== 'undefined' ? fetch : null);
+    if (!cfg || cfg.provider === 'mock' || !cfg.provider) return mockLLM;
+    return async function (system, messages) {
+      if (cfg.provider === 'anthropic') {
+        var r = await fetchFn(cfg.endpoint || 'https://api.anthropic.com/v1/messages', { method: 'POST',
+          headers: Object.assign({ 'content-type': 'application/json', 'x-api-key': cfg.apiKey, 'anthropic-version': '2023-06-01' }, cfg.browser ? { 'anthropic-dangerous-direct-browser-access': 'true' } : {}),
+          body: JSON.stringify({ model: cfg.model || 'claude-sonnet-5-5', max_tokens: cfg.maxTokens || 500, temperature: cfg.temperature === undefined ? 0.3 : cfg.temperature, system: system, messages: messages }) });
+        var j = await r.json(); if (!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status));
+        return j.content.filter(function (c) { return c.type === 'text'; }).map(function (c) { return c.text; }).join('\n');
+      }
+      var r2 = await fetchFn(cfg.endpoint || 'https://api.openai.com/v1/chat/completions', { method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + cfg.apiKey },
+        body: JSON.stringify({ model: cfg.model, max_tokens: cfg.maxTokens || 500, temperature: cfg.temperature === undefined ? 0.3 : cfg.temperature, messages: [{ role: 'system', content: system }].concat(messages) }) });
+      var j2 = await r2.json(); if (!r2.ok) throw new Error((j2.error && j2.error.message) || ('HTTP ' + r2.status));
+      return j2.choices[0].message.content;
+    };
+  }
+
+  var API = { P: P, VARS: VARS, TRUE_EDGES: TRUE_EDGES, CAUSES: CAUSES, INTERVENTIONS: INTERVENTIONS, TESTS: TESTS, CONFIGS: CONFIGS, ROLE_NAMES: ROLE_NAMES,
+    newPlant: newPlant, physics: physics, runWeek: runWeek, runTest: runTest, commission: commission, plantValue: plantValue, operatorNotes: operatorNotes,
+    scoreMap: scoreMap, pathSigns: pathSigns, scoreDiagnosis: scoreDiagnosis, scorePlant: scorePlant, weekOneProfile: weekOneProfile, recovery: recovery, Room: Room, viewText: viewText, mockLLM: mockLLM, makeLLM: makeLLM, REQ_CHANGE: REQ_CHANGE, SCEN: SCEN };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.PS = API;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var Q = new URLSearchParams(location.search), $ = function (id) { return document.getElementById(id); };
+  var DEFAULT_SCEN = Q.get('scenario') || window.PS_DEFAULT_SCENARIO || 'pump';
+  var NAMES = PS.ROLE_NAMES, VARN = {}; PS.VARS.forEach(function (v) { VARN[v[0]] = v[1]; });
+  var view = null, act = null, myRole = null, localRoom = null, debug = false, instrShown = false, staticBuilt = false;
+  function fmt(v, d) { return Number(v).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(msg) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = msg; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 3500); }
+
+  // ---------------------------------------------------------------- instructions (role- and team-specific)
+  function instructions(v) {
+    var me = v.role, kinds = {}; v.team.forEach(function (t) { kinds[t.role] = t.kind; });
+    var triad = !!kinds.rel, hasAI = v.team.some(function (t) { return t.kind === 'ai'; }), micro = v.scenario === 'micro';
+    var who = function (r) { return r === me ? 'you' : (kinds[r] === 'ai' ? 'AI teammate' : 'another person'); };
+    var roleText = {
+      ops: '<b>Operations</b> (' + who('ops') + '): sees the operating records (water delivered, shutdowns, money) and what the operators noticed. Sets the pump speed and valve opening.' + (triad ? '' : ' Also orders repairs and upgrades.'),
+      diag: '<b>Diagnostics</b> (' + who('diag') + '): sees the sensor readings (water flow and motor temperature) and the pump data sheet. Runs diagnostic tests.' + (triad ? '' : ' Also has the list of failure modes and the safety limits.'),
+      rel: '<b>Maintenance</b> (' + who('rel') + '): has the list of failure modes, the safety limits and the catalog of repairs and upgrades. Orders repairs and upgrades.'
+    };
+    var h = '<h2>' + esc(v.scenarioName) + ': instructions (you are ' + NAMES[me] + ')</h2>' +
+      '<h3>Your job</h3><p>' + (micro ? 'Your team runs a small plant that removes <b>microplastics</b> from river water for a town\'s drinking water. Right now the plant delivers too little treated water and sometimes shuts down.' :
+        'Your team runs the water system of a factory. Right now it delivers too little water and sometimes shuts down.') +
+      (v.practiceWeeks ? ' You have ' + v.practiceWeeks + ' practice weeks and then <b>12 scored weeks</b> to find out why, fix it, and run the plant well.' : ' You have <b>12 weeks</b> to find out why, fix it, and run the plant well.') + (micro ? ' (In this task the filter always removes the microplastics, so the water is always safe to drink.)' : '') + '</p>' +
+      (v.practiceWeeks ? '<h3>First: ' + v.practiceWeeks + ' practice weeks</h3><p>Nothing you do in the practice weeks counts. Use them to try things out and learn how the plant works. After the last practice week, the plant is reset to how it was at the start, and the 12 scored weeks begin. Your team map and the chat stay.</p>' : '') +
+      '<h3>Your goal</h3><p>' + (v.practiceWeeks ? 'In the 12 scored weeks, make' : 'Make') + ' the <b>plant value</b> go up every week. It goes up when the plant delivers enough ' + (micro ? 'treated water' : 'water') + ' at a low cost. It goes down with water shortfalls, electricity, tests, repairs, fines and wear on the equipment.</p>' +
+      '<h3>Your team</h3><ul>' + Object.keys(kinds).map(function (r) { return '<li>' + roleText[r] + '</li>'; }).join('') + '</ul>' +
+      '<p><b>Each person sees different information.</b> You see only your own panel. Use the <b>team chat</b> to share what you see, ask for what you need, and agree on what to do. No role is the boss.</p>' +
+      '<h3>Each week</h3><ol><li>Talk in the chat.</li><li>Make your changes (settings, tests, orders).</li><li>Click <b>Ready for next week</b>. The week runs when every person is ready.</li></ol>' +
+      '<p>Changes count from the week that runs next. Some repairs take more than one week to install.</p>' +
+      '<h3>Your team hands in two things</h3><ul><li><b>A causal map:</b> arrows that show which quantities change which. It is saved at the end of ' + (v.practiceWeeks ? 'practice, ' : '') + 'week 4 and week 12.</li>' +
+      '<li><b>A diagnosis:</b> what is causing the problems and which fixes you recommend. Hand in one <b>before week 7</b> and a final one <b>before week 12</b>. Anyone can propose; every person must approve.</li></ul>' +
+      '<h3>Your own map</h3><p>Before ' + (v.practiceWeeks ? 'practice starts' : 'week 1') + ', and again after week 12, each person draws <b>their own</b> map alone. Only you see it. It is not shared with the team and does not change the plant.</p>' +
+      '<p>New information may arrive during the task.</p>';
+    if (hasAI) h += '<h3>About the AI teammate</h3><p>The ' + v.team.filter(function (t) { return t.kind === 'ai'; }).map(function (t) { return t.name; }).join(' and ') +
+      ' member is an AI. It sees only its own role\'s information and can do only what that role can do. It can edit the causal map. It does not know the answer and can be wrong. ' +
+      'It cannot click Ready or approve a diagnosis. Chat with it like any teammate.</p>';
+    h += '<p class="note">Words with a dotted underline can be clicked for a short explanation. The Glossary, Tutorial, Instructions and Tour buttons at the top open these screens again. Everything you write and do is recorded.</p>';
+    return h;
+  }
+
+  // ---------------------------------------------------------------- static UI parts (built once)
+  function buildStatic(v) {
+    var opts = PS.VARS.map(function (x) { return '<option value="' + x[0] + '">' + x[1] + '</option>'; }).join('');
+    $('mFrom').innerHTML = opts; $('mTo').innerHTML = opts; $('mTo').value = 'flow';
+    $('dCauses').innerHTML = v.causes.map(function (c) { return '<label><input type="checkbox" value="' + c[0] + '"> ' + tl(c[1]) + '</label>'; }).join('');
+    $('dInts').innerHTML = PS.INTERVENTIONS.map(function (i) { return '<label><input type="checkbox" value="' + i.id + '"> ' + tl(v.labels.interventions[i.id]) + '</label>'; }).join('');
+    $('mapLegend').innerHTML = 'Boxes: ' + PS.VARS.map(function (x) { return gt(x[1], x[1]); }).join(' · ') + '.<br>Arrow A → B: changing A directly changes B. <span class="edge-pos">+</span> more A gives more B. <span class="edge-neg">−</span> more A gives less B. Dashed: not sure yet. Thick or thin: large or small effect (optional).';
+    if (v.permissions.settings) { $('rpSettings').classList.remove('hidden'); $('setSpeed').value = v.settings.speed; $('setValve').value = v.settings.valve; }
+    if (v.permissions.tests) {
+      $('rpTests').classList.remove('hidden');
+      $('testButtons').innerHTML = PS.TESTS.map(function (t) {
+        return '<div class="row"><button data-test="' + t.id + '">' + esc(v.labels.tests[t.id]) + '</button> <span class="note">cost ' + t.cost + ' · ' + gt('?', t.id === 'testrun' ? 'Test run' : 'Diagnostic test') + '</span>' +
+          (t.params ? ' pump speed <input id="trS" type="number" min="40" max="100" step="5" value="80" style="width:58px">% valve opening <input id="trV" type="number" min="20" max="100" step="10" value="100" style="width:58px">%' : '') + '</div>';
+      }).join('');
+      $('testButtons').querySelectorAll('[data-test]').forEach(function (b) { b.onclick = function () { var a = { type: 'test', test: b.dataset.test }; if (b.dataset.test === 'testrun') { a.speed = Number($('trS').value); a.valve = Number($('trV').value); } act(a); }; });
+    }
+    staticBuilt = true;
+  }
+
+  // ---------------------------------------------------------------- render
+  function render(v) {
+    view = v;
+    if (applyScenario.sc !== v.scenario) applyScenario(v.scenario);
+    if (!staticBuilt || (debug && buildStatic.lastRole !== v.role)) { resetRoleStatic(); buildStatic(v); buildStatic.lastRole = v.role; }
+    var cur = v.valueSeries[v.valueSeries.length - 1].value;
+    $('hWeek').textContent = v.finished ? 'Finished' : (v.phase === 'practice' ? 'Practice week ' + v.week + ' of ' + v.practiceWeeks + ' (does not count)' : 'Week ' + v.week + ' of ' + v.weeks);
+    $('valueTitle').textContent = v.phase === 'practice' ? 'Plant value (practice; does not count)' : 'Plant value';
+    $('phaseBanner').classList.toggle('hidden', v.phase !== 'practice');
+    if (v.phase === 'practice') $('phaseBanner').innerHTML = '<b>Practice week ' + v.week + ' of ' + v.practiceWeeks + '.</b> Nothing counts yet. Try things out and learn how the plant works. After practice week ' + v.practiceWeeks + ', the plant is reset to how it was at the start and the 12 scored weeks begin. Your map and the chat stay.';
+    if (render.lastPhase === 'practice' && v.phase === 'main') showMsg('<h2>Practice is over</h2><p>The plant has been reset to how it was at the start: the same settings, the same filter, no repairs or upgrades, and the starting amount of money.</p><p><b>From now on, every week counts.</b> Your team map and the chat stay. Your records still show the practice weeks (P1, P2, …) above the scored weeks.</p>');
+    render.lastPhase = v.phase;
+    $('hValue').textContent = fmt(cur);
+    $('hRole').textContent = v.roleName; $('hName').textContent = v.scenarioName; document.title = v.scenarioName + ' — team task';
+    $('hTeam').innerHTML = v.team.map(function (t) { return '<span class="chip' + (t.ready ? ' ready' : '') + '">' + t.name + (t.kind === 'ai' ? ' (AI)' : '') + (t.kind === 'human' && !t.joined ? ' — not joined' : '') + (t.ready ? ' ✓' : '') + '</span>'; }).join(' ');
+    $('rpTitle').textContent = 'Your information: ' + v.roleName;
+    $('rpNotices').innerHTML = v.private.filter(function (p) { return p.kind === 'notice'; }).map(function (p) { return '<div class="notice">' + tl(p.text) + '</div>'; }).join('');
+    if (v.permissions.settings) {
+      $('setCurrent').textContent = 'Current settings: pump speed ' + v.settings.speed + '%, valve opening ' + v.settings.valve + '%. Pump speed 40–100 in steps of 5; valve opening 20–100 in steps of 10. New settings count from the week that runs next.';
+      if (document.activeElement !== $('setSpeed') && document.activeElement !== $('setValve') && !$('setSpeed').dataset.dirty) { $('setSpeed').value = v.settings.speed; $('setValve').value = v.settings.valve; }
+    }
+    if (v.permissions.tests) $('testsLeft').textContent = v.testsLeft;
+    $('rpDynamic').innerHTML = dynamicRole(v);
+    $('rpDynamic').querySelectorAll('[data-order]').forEach(function (b) { b.onclick = function () { act({ type: 'commission', id: b.dataset.order }); }; });
+    drawValue(v); drawMap(v); renderDiag(v); renderChat(v);
+    $('gate').textContent = v.gate || '';
+    var humans = v.team.filter(function (t) { return t.kind === 'human'; }), waiting = humans.filter(function (t) { return !t.ready; }).map(function (t) { return t.name; });
+    $('readyBtn').disabled = v.finished || v.kind !== 'human';
+    $('readyBtn').textContent = v.ready ? 'Ready ✓ (click to cancel)' : 'Ready for next week';
+    $('readyInfo').textContent = v.finished ? '' : (waiting.length ? 'Waiting for: ' + waiting.join(', ') : 'All ready.');
+    $('typing').textContent = v.aiTyping ? 'The AI teammate is writing…' : '';
+    if (!instrShown) { instrShown = true; startTutorial(); }
+    if (v.kind === 'human' && tour.done && !v.finished && !v.indiv.pre && !indiv.open) openIndiv('pre');
+    if (v.kind === 'human' && v.finished && !v.indiv.post && !indiv.open) openIndiv('post');
+    if (v.finished && (v.indiv.post || v.kind !== 'human') && !render.endShown) { render.endShown = true; showEnd(v); }
+    if (tour.on) tourPlace();
+  }
+  function resetRoleStatic() { $('rpSettings').classList.add('hidden'); $('rpTests').classList.add('hidden'); $('testButtons').innerHTML = ''; }
+  function dynamicRole(v) {
+    var h = '';
+    if (v.operations) {
+      h += '<h3>Operating records</h3><div class="note">' + tl(v.operations.constraints) + '</div>';
+      if (v.operations.weeks.length) {
+        h += '<div class="scroll"><table><tr><th>Week</th><th>' + gt('Speed %', 'Pump speed') + '</th><th>' + gt('Valve %', 'Valve opening') + '</th><th>' + gt('Delivered m³', 'Cubic meter') + '</th><th>' + gt('Shortfall m³', 'Shortfall') + '</th><th>' + gt('Hours stopped', 'Shutdown') + '</th><th>' + gt('Shutdowns', 'Shutdown') + '</th><th>' + gt('Income', 'Income') + '</th><th>' + gt('Electricity', 'Electricity') + '</th><th>' + gt('Penalty + fine', 'Shortfall') + '</th><th>' + gt('Tests and orders', 'Intervention') + '</th><th>' + gt('Account', 'Account') + '</th></tr>' +
+          v.operations.weeks.map(function (w) { return '<tr><td>' + w.week + '</td><td>' + w.speed + '</td><td>' + w.valve + '</td><td>' + fmt(w.volume) + '</td><td>' + fmt(w.shortfall) + '</td><td>' + w.downtimeHours + '</td><td>' + w.shutdowns + '</td><td>' + fmt(w.revenue) + '</td><td>' + fmt(w.energyCost) + '</td><td>' + fmt(w.penalty + w.fine) + '</td><td>' + fmt(w.spent) + '</td><td>' + fmt(w.account) + '</td></tr>'; }).join('') + '</table></div>';
+        h += '<h3>Operator observations</h3><div class="scroll" style="max-height:160px">' + v.operations.weeks.slice().reverse().map(function (w) { return '<div class="priv"><b>Week ' + w.week + ':</b> ' + tl(w.notes.join(' ')) + '</div>'; }).join('') + '</div>';
+      } else h += '<div class="note">No week has run yet. Before the problems started, the plant ran at pump speed 90% with the valve opening at 50%.</div>';
+    }
+    if (v.sensors) {
+      h += '<h3>Sensor readings (' + gt('weekly averages', 'Weekly average') + ')</h3>';
+      h += v.sensors.length ? '<div class="scroll"><table><tr><th>Week</th><th>' + gt('Water flow m³/h', 'Water flow') + '</th><th>' + gt('Motor temperature °C', 'Motor temperature') + '</th></tr>' +
+        v.sensors.map(function (s) { return '<tr><td>' + s.week + '</td><td>' + s.flow + '</td><td>' + s.temp + '</td></tr>'; }).join('') + '</table></div>' : '<div class="note">Sensor readings appear after the first week has run. You can run diagnostic tests now.</div>';
+    }
+    if (v.specs) h += '<h3>Pump data sheet</h3><div class="note">' + tl(v.specs) + '</div>';
+    if (v.safety) h += '<h3>Safety limits</h3><div class="note">' + tl(v.safety) + '</div>';
+    if (v.failureModes) h += '<h3>' + gt('Failure modes', 'Failure mode') + ' and their ' + gt('symptoms', 'Symptom') + '</h3><table>' + v.failureModes.map(function (f) { return '<tr><td class="l"><b>' + tl(f[0]) + '</b></td><td class="l">' + tl(f[1]) + '</td></tr>'; }).join('') + '</table>';
+    if (v.catalog) {
+      h += '<div id="catalogBox"><h3>Catalog of repairs and upgrades (' + gt('interventions', 'Intervention') + ')</h3><table><tr><th class="l">Intervention</th><th>Cost</th><th>' + gt('Effective after', 'Effective after') + '</th><th class="l">Notes</th>' + (v.permissions.interventions ? '<th></th>' : '') + '</tr>' +
+        v.catalog.map(function (c) { var pend = v.orders && v.orders.pending.some(function (p) { return p.id === c.id; }); return '<tr><td class="l">' + tl(c.name) + '</td><td>' + fmt(c.cost) + '</td><td>' + c.delay + ' wk</td><td class="l">' + tl(c.note + ' Chance of failure: ' + c.failureChance + '.') + '</td>' + (v.permissions.interventions ? '<td>' + (pend ? 'ordered' : '<button data-order="' + c.id + '">Order</button>') + '</td>' : '') + '</tr>'; }).join('') + '</table>';
+      if (!v.orders) h += '</div>';
+    }
+    if (v.orders) {
+      var nm = function (id) { return v.labels.interventions[id] || id; };
+      h += '<div class="note" style="margin-top:4px">Ordered, not yet working: ' + (v.orders.pending.length ? v.orders.pending.map(function (p) { return esc(nm(p.id)) + ' (working from week ' + p.effectiveWeek + ')'; }).join('; ') : 'none') +
+        '. Installed: ' + (v.orders.installed.length ? v.orders.installed.map(function (p) { return esc(nm(p.id)) + ' (week ' + p.week + ')'; }).join('; ') : 'none') + '.</div>' + (v.catalog ? '</div>' : '');
+    }
+    var tests = v.private.filter(function (p) { return p.kind === 'test'; });
+    if (tests.length) h += '<h3>Your test results</h3>' + tests.slice().reverse().map(function (p) { return '<div class="priv">[week ' + p.week + '] ' + tl(p.text) + '</div>'; }).join('');
+    return h;
+  }
+  function drawValue(v) {
+    var c = $('valueChart'), x = c.getContext('2d'), W = c.width, H = c.height, s = v.valueSeries, L = 70, R = 14, T = 12, B = 26;
+    x.clearRect(0, 0, W, H);
+    var vals = s.map(function (p) { return p.value; }), mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals); if (mx - mn < 1000) { mx += 500; mn -= 500; }
+    var X = function (w) { return L + (W - L - R) * w / v.weeks; }, Y = function (val) { return T + (H - T - B) * (1 - (val - mn) / (mx - mn)); };
+    x.font = '11px Arial'; x.fillStyle = '#667'; x.strokeStyle = '#e6e9ec';
+    for (var g = 0; g <= 4; g++) { var gv = mn + (mx - mn) * g / 4; x.beginPath(); x.moveTo(L, Y(gv)); x.lineTo(W - R, Y(gv)); x.stroke(); x.textAlign = 'right'; x.fillText(fmt(gv), L - 4, Y(gv) + 4); }
+    for (var w = 0; w <= v.weeks; w += 2) { x.textAlign = 'center'; x.fillText('wk ' + w, X(w), H - 8); }
+    x.strokeStyle = '#20384f'; x.lineWidth = 2; x.beginPath(); s.forEach(function (p, i) { if (i) x.lineTo(X(p.week), Y(p.value)); else x.moveTo(X(p.week), Y(p.value)); }); x.stroke();
+    s.forEach(function (p) { x.fillStyle = '#20384f'; x.beginPath(); x.arc(X(p.week), Y(p.value), 3, 0, 7); x.fill(); });
+    x.lineWidth = 1;
+    $('valueTable').innerHTML = '<tr><th class="l">Week</th>' + s.map(function (p) { return '<th>' + p.week + '</th>'; }).join('') + '</tr><tr><td class="l">Value</td>' + s.map(function (p) { return '<td>' + fmt(p.value) + '</td>'; }).join('') + '</tr>';
+  }
+  function mapSVG(vars, edges, cx, cy, rx, ry, idp) {
+    var n = vars.length, pos = {}, h = '';
+    vars.forEach(function (x, i) { var a = -Math.PI / 2 + 2 * Math.PI * i / n; pos[x[0]] = [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]; });
+    h += '<defs><marker id="' + idp + 'p" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 z" fill="#1f7a3c"/></marker><marker id="' + idp + 'n" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 z" fill="#b23b2b"/></marker></defs>';
+    edges.forEach(function (e) {
+      var a = pos[e.from], b = pos[e.to], dx = b[0] - a[0], dy = b[1] - a[1], d = Math.sqrt(dx * dx + dy * dy), ux = dx / d, uy = dy / d, off = 4;
+      var ax = Math.abs(ux), ay = Math.abs(uy), dd = Math.min(ax ? 69 / ax : 1e9, ay ? 16 / ay : 1e9);   // distance from box center to its edge along the arrow
+      var x1 = a[0] + ux * dd - uy * off, y1 = a[1] + uy * dd + ux * off, x2 = b[0] - ux * (dd + 2) - uy * off, y2 = b[1] - uy * (dd + 2) + ux * off;
+      var col = e.sign === '+' ? '#1f7a3c' : '#b23b2b';
+      h += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + col + '" stroke-width="' + (e.size === 'large' ? 4 : e.size === 'small' ? 1.3 : 2) + '" ' + (e.certain ? '' : 'stroke-dasharray="5,4" ') + 'marker-end="url(#' + idp + (e.sign === '+' ? 'p' : 'n') + ')"/>';
+      h += '<text x="' + ((x1 + x2) / 2 + 4) + '" y="' + ((y1 + y2) / 2 - 3) + '" font-size="13" fill="' + col + '" font-weight="bold">' + (e.sign === '+' ? '+' : '−') + '</text>';
+    });
+    vars.forEach(function (x) { var p = pos[x[0]]; h += '<rect x="' + (p[0] - 66) + '" y="' + (p[1] - 13) + '" width="132" height="26" rx="5" fill="#fff" stroke="#20384f"/><text x="' + p[0] + '" y="' + (p[1] + 4) + '" font-size="11" text-anchor="middle" fill="#20384f">' + esc(x[1]) + '</text>'; });
+    return h;
+  }
+  function mapListHTML(edges, names, by) {
+    return edges.length ? edges.map(function (e) { return '<div>' + esc(names[e.from]) + ' → ' + esc(names[e.to]) + ' <span class="' + (e.sign === '+' ? 'edge-pos">+' : 'edge-neg">−') + '</span>' + (e.certain ? '' : ' (not sure yet)') + (e.size ? ' · ' + e.size + ' effect' : '') + (e.why ? ' <span class="why">“' + esc(e.why) + '”</span>' : '') + (by && e.by ? ' <span style="color:#889">— ' + NAMES[e.by] + '</span>' : '') + ' <button data-rm="' + e.from + '|' + e.to + '" style="padding:0 6px">remove</button></div>'; }).join('') : 'No arrows yet.';
+  }
+  function drawMap(v) {
+    $('mapSvg').innerHTML = mapSVG(PS.VARS, v.map, 260, 150, 188, 118, 'm');
+    $('mapList').innerHTML = mapListHTML(v.map, VARN, true);
+    $('mapList').querySelectorAll('[data-rm]').forEach(function (b) { b.onclick = function () { var p = b.dataset.rm.split('|'); act({ type: 'map_remove', from: p[0], to: p[1] }); }; });
+  }
+  function renderDiag(v) {
+    var d = v.diagnosis, cn = {}, inN = {};
+    v.causes.forEach(function (c) { cn[c[0]] = c[1]; }); PS.INTERVENTIONS.forEach(function (i) { inN[i.id] = v.labels.interventions[i.id]; });
+    var st = [];
+    if (v.phase === 'practice') st.push('<b>During practice, no diagnosis is needed.</b> Diagnoses are handed in during the scored weeks.');
+    st.push('Initial diagnosis (required before week 7): ' + (d.initial ? 'submitted in week ' + d.initial.submittedWeek : 'not yet submitted') + '.');
+    st.push('Final diagnosis (required before week 12): ' + (d.final ? 'submitted in week ' + d.final.submittedWeek : 'not yet submitted') + '.');
+    $('diagStatus').innerHTML = st.join('<br>');
+    if (d.draft) {
+      var humans = v.team.filter(function (t) { return t.kind === 'human'; }).map(function (t) { return t.role; });
+      var need = humans.filter(function (r) { return d.draft.approvals.indexOf(r) < 0; });
+      $('diagDraft').innerHTML = '<div class="priv"><b>Proposal by ' + NAMES[d.draft.by] + ':</b><br>Causes: ' + (d.draft.causes.map(function (c) { return esc(cn[c]); }).join('; ') || 'none') +
+        '<br>Interventions: ' + (d.draft.interventions.map(function (c) { return esc(inN[c]); }).join('; ') || 'none') + '<br>Justification: ' + esc(d.draft.justification || '—') +
+        '<br>Approved by: ' + (d.draft.approvals.map(function (r) { return NAMES[r]; }).join(', ') || 'nobody yet') + (need.length ? ' — waiting for ' + need.map(function (r) { return NAMES[r]; }).join(', ') : '') +
+        (v.kind === 'human' && need.indexOf(v.role) >= 0 ? '<br><button class="go" id="dApprove">Approve this proposal</button>' : '') + '</div>';
+      if ($('dApprove')) $('dApprove').onclick = function () { act({ type: 'diag_approve' }); };
+    } else $('diagDraft').innerHTML = '';
+  }
+  function renderChat(v) {
+    var log = $('chatLog'), atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+    if (renderChat.n === v.chat.length && renderChat.role === v.role) return;
+    log.innerHTML = v.chat.map(function (m) {
+      var cls = m.role === v.role ? 'me' : (m.kind === 'ai' ? 'ai' : 'other');
+      return '<div class="msg ' + cls + '"><div class="who">' + NAMES[m.role] + (m.kind === 'ai' ? '<span class="badge">AI</span>' : '') + (m.role === v.role ? ' (you)' : '') + ' · ' + (m.phase === 'practice' ? 'practice week ' : 'week ') + m.week + '</div>' + esc(m.text) + '</div>';
+    }).join('');
+    if (atBottom || renderChat.role !== v.role) log.scrollTop = log.scrollHeight;
+    renderChat.n = v.chat.length; renderChat.role = v.role;
+  }
+  function showEnd(v) {
+    var sc = v.scores, b = '<p>Final plant value: <b>' + fmt(sc.primary.finalValue) + '</b>.</p>';
+    if (debug) b += '<pre style="font-size:11px;white-space:pre-wrap">' + esc(JSON.stringify(sc, null, 2)) + '</pre>';
+    $('endBody').innerHTML = b; $('endScreen').classList.remove('hidden');
+    if (localRoom) $('endLog').classList.remove('hidden');
+  }
+
+
+  // ---------------------------------------------------------------- concept tutorial, glossary and in-context explanations (identical for all roles and team types)
+  // Rule: these explain parts, words, units and money so that the task can be done without outside resources.
+  // They never state how the six causal-map quantities affect each other in this plant, and they never reveal role-specific evidence (limits, prices, catalog effects).
+  var TUT = [], GLOSSARY = [], QUIZ = [], TERM_RX = [];
+  function makeTutorial(sc) {
+    var m = sc === 'micro';
+    var W = m ? { site: 'the town', payer: 'The water utility', water: 'treated water', filter: 'microplastic filter', Filter: 'Microplastic filter', dirt: 'microplastics and other small particles', reach: 'reaches the town\'s drinking-water tank', system: 'plant' }
+              : { site: 'the factory', payer: 'The factory', water: 'water', filter: 'filter', Filter: 'Filter', dirt: 'dirt', reach: 'reaches the factory', system: 'system' };
+    // [label, explanation, pattern used to underline the term where it appears on the dashboard (null = not underlined)]
+    var G = [
+      ['Pump', 'A machine that pushes water through the pipes. This plant uses a piston pump.', null],
+      ['Piston pump', 'A pump in which a piston moves back and forth inside a cylinder and pushes the water along, a bit like a bicycle pump. Also called a positive-displacement pump.', /\bpiston pump\b|\bpositive-displacement\b/i],
+      ['Pressure', 'How hard the water pushes on the inside of the pipes.', null],
+      ['Pressure-relief bypass', 'A safety valve on the pump. If the water pressure gets too high, it opens and lets some water flow back to the ' + (m ? 'river side' : 'supply side') + ' of the pump instead of onward. This protects the pump and the pipes.', /\bpressure-relief bypass\b|\bbypass\b/i],
+      ['Motor', 'The electric motor that turns the pump.', null],
+      ['Pump speed (%)', 'How fast the motor turns, as a percent of its top speed. 100% = full speed; 40% = the lowest setting. It can be changed in steps of 5%.', /\bpump speed\b/i],
+      ['Valve', 'A gate in the pipe after the pump. It can be opened or closed.', null],
+      ['Valve opening (%)', 'How far the valve is open. 100% = fully open; 20% = mostly closed. It can be changed in steps of 10%.', /\bvalve opening\b/i],
+      ['Throttling', 'Partly closing a valve to hold back the water. A valve that is partly closed is called "throttled".', /\bthrottl\w*/i],
+      ['Valve actuator', 'The small motor that moves the valve to the opening you choose.', /\b(valve )?actuator\b/i],
+      [W.Filter, 'Catches ' + W.dirt + ' from the water. What it catches stays inside it.' + (m ? ' In this task it always removes the microplastics from the water that passes through it, so the water is always safe to drink.' : ''), m ? /\bmicroplastic filter\b/i : null],
+      ['Filter clogging (%)', 'How full the ' + W.filter + ' is. 0% = new and clean; 100% = completely full. A filter that is very full is called "clogged".', /\bclog\w*/i],
+      ['Filter cartridge', 'The part inside the filter that catches ' + W.dirt + '. A used cartridge can be swapped for a new one.', /\bcartridge\b/i],
+      ['Filter housing', 'The case that holds the filter cartridge. A larger housing holds a larger cartridge.', /\bfilter housing\b/i],
+      ['Water flow (m³/h)', 'How much ' + W.water + ' ' + W.reach + ' each hour, in cubic meters per hour (m³/h).', /m³\/h/],
+      ['Cubic meter (m³)', 'A unit of volume. 1 m³ = 1,000 liters, about 7 full bathtubs. A week has 168 hours, so a flow of 10 m³/h for a whole week delivers 10 × 168 = 1,680 m³.', /m³(?!\/h)/],
+      ['Weekly average', 'Sensors measure all the time. The weekly average is the typical value over that week.', /\bweekly averages?\b/i],
+      ['Data sheet and rated flow', 'A data sheet is the maker\'s description of a machine. The rated flow is the flow the maker promises under the conditions stated on the data sheet.', /\bdata sheet\b|\brated\b/i],
+      ['Motor temperature (°C)', 'How hot the motor is, in degrees Celsius (°C). For comparison: hot tap water is about 50 °C; water boils at 100 °C.', /°C/],
+      ['Cooling fan', 'A fan on the motor that blows air over it to carry heat away.', /\bcooling fan\b|\bfan\b/i],
+      ['Settle (steady temperature)', 'A running motor turns part of its electricity into heat, and its fan carries heat away. When the motor loses heat as fast as it makes it, its temperature stops changing: it settles at a steady value.', /\bsettle\w*/i],
+      ['Cooling upgrade', 'An add-on for the motor\'s cooling. The catalog of repairs and upgrades says exactly what it does.', /\bcooling upgrade\b/i],
+      ['Safety limit', 'The highest temperature the motor may reach. If it gets hotter, the ' + W.system + ' shuts down by itself to protect the motor.', /\bsafety limits?\b/i],
+      ['Shutdown', 'The ' + W.system + ' stops by itself for a while to protect the equipment. During a shutdown no water is delivered. An alarm in the records says why it happened.', /\bshuts down\b|\bshut ?downs?\b/i],
+      ['Strained', 'Working very hard. A pump that sounds strained makes a laboring noise.', /\bstrained\b/i],
+      ['Plant value', 'The money in the plant\'s account plus the equipment value. Your team\'s goal is to make it go up every week.', /\bplant value\b/i],
+      ['Account', 'The plant\'s money. Income is added to it each week; costs are taken from it.', null],
+      ['Equipment value', 'What the plant\'s machines are worth, including upgrades the team installs. Machines slowly wear out with use, which lowers their value.', /\bequipment\b/i],
+      ['Income (credit)', W.payer + ' pays the plant for every m³ of ' + W.water + ' delivered. This is the plant\'s income (also called revenue; "credited" means paid to the plant).', /\bcredit\w*|\brevenue\b/i],
+      ['Electricity and kWh', 'The motor runs on electricity. The plant pays for it by the kilowatt-hour (kWh). 1 kWh is the energy a 1,000-watt heater uses in one hour.', /\bkWh\b|\belectricity\b/i],
+      ['Fixed operating cost', 'A cost that is the same every week, for example staff and rent.', /\bfixed operating cost\b/i],
+      ['Shortfall and penalty', 'The shortfall is the ' + W.water + ' that ' + W.site + ' needed but did not get. The plant pays a penalty for every m³ of shortfall.', /\bshortfall\b|\bpenalt\w*/i],
+      ['Fine', 'Money the plant must pay for breaking a rule.', /\bfines?\b/i],
+      ['Symptom', 'Something you can observe that shows a problem, for example low flow or a hot motor.', /\bsymptoms?\b/i],
+      ['Failure mode', 'A known way that equipment can go wrong. Each failure mode has typical symptoms.', /\bfailure.modes?\b/i],
+      ['Undersized', 'Too small for the job.', /\bundersized\b|\btoo small\b/i],
+      ['Diagnosis', 'Your team\'s conclusion about what is causing the problems, together with the fixes it recommends.', /\bdiagnosis\b/i],
+      ['Diagnostic test', 'A check that gives you evidence. Each test costs money, and at most 2 tests can be run per week. Only the person who runs a test sees its result.', /\bdiagnostic tests?\b|\binspection\b/i],
+      ['Test run', 'A one-hour try-out at a pump speed and valve opening you choose. It shows what would happen at those settings. It does not change the plant\'s settings.', /\btest run\b/i],
+      ['Intervention', 'A repair or upgrade the team can order. It is paid when it is ordered.', /\binterventions?\b/i],
+      ['Effective after', 'How many weeks pass before an ordered repair or upgrade is installed and working.', /\beffective after\b/i],
+      ['Chance of failure (of a repair)', 'How likely a repair or upgrade is to fail to work as described: low or medium.', /\bchance of failure\b/i],
+      ['Practice weeks', 'The first weeks of the task. Nothing in them counts. After the last practice week the plant is reset to how it was at the start.', /\bpractice weeks?\b/i],
+      ['Effect size (on the map)', 'Optional: whether you think an arrow stands for a small or a large effect. Large effects are drawn thick, small ones thin.', null],
+      ['Your own map', 'A causal map you draw alone, before the first week and again after week 12. Only you see it.', null],
+      ['Causal map', 'Your team\'s drawing of which quantities change which. Arrow A → B: changing A directly changes B. Green +: more A gives more B. Red −: more A gives less B. Dashed: not sure yet.', /\bcausal map\b/i]
+    ];
+    if (m) G.unshift(['Microplastics', 'Tiny pieces of plastic smaller than 5 mm, found for example in rivers and lakes. Many are too small to see.', /\bmicroplastics\b/i]);
+    var intro = { title: m ? 'The microplastic removal plant' : 'The water system', focus: null, vocab: m ? ['Microplastics', 'Microplastic filter', 'Pump', 'Valve'] : ['Pump', 'Motor', 'Valve', 'Filter'],
+      text: (m ? 'Your team runs a small plant that cleans river water for a town. Water is taken from a <span class="term">river</span>, is pushed by a <span class="term">pump</span> through a <span class="term">microplastic filter</span>, and flows through a <span class="term">valve</span> into the town\'s <span class="term">drinking-water tank</span>.'
+        : 'Your team runs the water system of a factory. Water comes from a <span class="term">water supply</span>, is pushed by a <span class="term">pump</span> through a <span class="term">filter</span>, and flows through a <span class="term">valve</span> to the <span class="term">factory</span>.') +
+        '<br><br>This tutorial explains the parts, words and numbers used in the task. It does <b>not</b> tell you how the parts affect each other in this plant. Finding that out is your team\'s job.' };
+    var T = [intro];
+    if (m) T.push({ title: 'What are microplastics?', focus: ['p-filter'], vocab: ['Microplastics', 'Microplastic filter'], extra: function () { return microIllustration(); },
+      text: '<span class="term">Microplastics</span> are tiny pieces of plastic, smaller than 5 millimeters. Many are too small to see. They come, for example, from plastic waste that breaks apart and from fibres of synthetic clothing.<br>The plant\'s <span class="term">microplastic filter</span> catches them. <b>In this task the filter always removes the microplastics from the water that passes through it</b>, so the water is always safe to drink. Your team\'s job is to deliver enough treated water to the town at a low cost.' });
+    T.push(
+      { title: 'Piston pump, motor and pump speed', focus: ['p-pump', 'p-motor'], vocab: ['Piston pump', 'Motor', 'Pump speed (%)', 'Pressure-relief bypass'],
+        extra: function () { return scale('Pump speed', [40, 60, 80, 100], '%', 'lowest setting', 'full speed'); },
+        text: 'The <span class="term">pump</span> pushes the water through the pipes. This plant uses a <span class="term">piston pump</span>: a piston moves back and forth inside a cylinder and pushes the water along, a bit like a bicycle pump. An electric <span class="term">motor</span> drives it.<br>The pump has a <span class="term">pressure-relief bypass</span>: a safety valve that opens if the water pressure gets too high and lets some water flow back to the ' + (m ? 'river side' : 'supply side') + ' of the pump, to protect the pump and pipes.<br><span class="term">Pump speed</span> is how fast the motor turns, as a percent of its top speed: 100% is full speed, 40% is the lowest setting. It can be changed in steps of 5%.' },
+      { title: 'Valve, valve opening and throttling', focus: ['p-valve'], vocab: ['Valve', 'Valve opening (%)', 'Throttling', 'Valve actuator'],
+        extra: function () { return valves(); },
+        text: 'The <span class="term">valve</span> is a gate in the pipe after the pump.<br><span class="term">Valve opening</span> says how far it is open: 100% is fully open, 20% is mostly closed. It can be changed in steps of 10%.<br>Partly closing a valve to hold back the water is called <span class="term">throttling</span>. The <span class="term">valve actuator</span> is the small motor that moves the valve to the opening you choose.' },
+      { title: (m ? 'Microplastic filter' : 'Filter') + ', clogging and cartridges', focus: ['p-filter'], vocab: [W.Filter, 'Filter clogging (%)', 'Filter cartridge', 'Filter housing'],
+        extra: function () { return filters(m); },
+        text: 'The <span class="term">' + W.filter + '</span> catches ' + W.dirt + ' from the water. What it catches stays inside it.<br><span class="term">Filter clogging</span> says how full the filter is: 0% is new and clean, 100% is completely full. A very full filter is called <span class="term">clogged</span>.<br>The <span class="term">cartridge</span> is the part inside that does the catching; a used cartridge can be swapped for a new one. The <span class="term">filter housing</span> is the case that holds the cartridge.' },
+      { title: 'Measuring the water', focus: ['p-meter'], vocab: ['Water flow (m³/h)', 'Cubic meter (m³)', 'Weekly average', 'Data sheet and rated flow'],
+        extra: function () { return flowFig(); },
+        text: '<span class="term">Water flow</span> is how much ' + W.water + ' ' + W.reach + ' each hour, in <span class="term">cubic meters per hour (m³/h)</span>. One cubic meter (m³) is 1,000 liters, about 7 full bathtubs.<br>A week has 168 hours. So a flow of 10 m³/h for a whole week delivers 10 × 168 = <b>1,680 m³</b>.<br>Sensors measure all the time. The task shows the <span class="term">weekly average</span>: the typical value for that week.<br>A pump\'s <span class="term">data sheet</span> gives its <span class="term">rated flow</span>: the flow the maker promises under stated conditions.' },
+      { title: 'Motor heat and shutdowns', focus: ['p-motor', 'p-thermo'], vocab: ['Motor temperature (°C)', 'Cooling fan', 'Settle (steady temperature)', 'Safety limit', 'Shutdown'],
+        extra: function () { return settleFig(); },
+        text: 'A running motor turns part of its electricity into heat. A <span class="term">cooling fan</span> on the motor blows air over it to carry heat away. When the motor loses heat as fast as it makes it, its temperature stops rising and <span class="term">settles</span> at a steady value.<br><span class="term">Motor temperature</span> is measured in degrees Celsius (°C). For comparison, hot tap water is about 50 °C.<br>Every motor has a <span class="term">safety limit</span>. If it gets hotter than that, the ' + W.system + ' stops by itself for a while to protect it. This is a <span class="term">shutdown</span>. During a shutdown no water is delivered.' },
+      { title: 'Money and the plant value', focus: ['p-factory'], vocab: ['Plant value', 'Income (credit)', 'Electricity and kWh', 'Shortfall and penalty', 'Equipment value'],
+        extra: function () { return moneyFig(m); },
+        text: 'The task runs for <b>12 weeks</b>. Each week money comes in and goes out (see the picture). <span class="term">Electricity</span> is paid by the kilowatt-hour (kWh): 1 kWh is the energy a 1,000-watt heater uses in one hour. A <span class="term">shortfall</span> is ' + W.water + ' that ' + W.site + ' needed but did not get; the plant pays a <span class="term">penalty</span> for it.<br>The <span class="term">plant value</span> is the money in the plant\'s account plus the <span class="term">equipment value</span> (what the machines are worth, including upgrades). Machines slowly wear out with use. <b>Your team\'s goal is to make the plant value go up every week.</b>' },
+      { title: 'Finding and fixing problems', focus: [], hideSys: true, vocab: ['Symptom', 'Failure mode', 'Diagnostic test', 'Diagnosis', 'Intervention'],
+        extra: function () { return fixFig(); },
+        text: 'A <span class="term">symptom</span> is something you can observe that shows a problem, such as low flow or a hot motor. A <span class="term">failure mode</span> is a known way that equipment can go wrong; each has typical symptoms.<br><span class="term">Diagnostic tests</span> give you more evidence. Each costs money, and at most 2 can be run per week.<br>A <span class="term">diagnosis</span> is your team\'s conclusion about the causes. An <span class="term">intervention</span> is a repair or upgrade you can order. <span class="term">Effective after</span> tells how many weeks pass before it works; <span class="term">chance of failure</span> tells how likely it is not to work as described.' },
+      { title: 'Causal maps', focus: [], hideSys: true, vocab: ['Causal map'],
+        extra: function () { return exampleMap(); },
+        text: 'Your team will draw a <span class="term">causal map</span> of which quantities change which. An arrow from A to B means: changing A changes B.<br>A <b style="color:#1f7a3c">+</b> arrow means more A gives more B. A <b style="color:#b23b2b">−</b> arrow means more A gives less B. A dashed arrow means the team is not sure yet.<br>On your team\'s map you can also mark an arrow\'s effect as small or large, and write why you think it is right.<br>The example above is from everyday life, not about the plant. The dashboard tour after the instructions lets you practice drawing one.' },
+      { title: 'Quick check', focus: null, quiz: true, vocab: [], text: 'Answer these questions about the words in this task. You can try again if an answer is not right.' }
+    );
+    var Qz = [
+      ['Valve opening 100% means …', ['the valve is fully open', 'the valve is fully closed', 'the pump runs at full speed'], 0],
+      ['Filter clogging 0% means …', ['the filter is new and clean', 'the filter is completely blocked', 'there is no filter'], 0],
+      ['During a shutdown …', ['no water is delivered', 'the pump runs at full speed', 'the filter is replaced'], 0],
+      ['A flow of 10 m³/h for a whole week (168 hours) delivers …', ['1,680 m³', '10 m³', '168 m³'], 0],
+      ['The plant value is …', ['the account plus the value of the equipment', 'the water delivered this week', 'the number of shutdowns'], 0],
+      ['A shortfall is …', ['water that was needed but not delivered', 'water that leaks out of the pipes', 'extra water stored in the tank'], 0],
+      ['In the causal map, a − arrow from A to B means …', ['more A gives less B', 'more A gives more B', 'A and B are not related'], 0]
+    ];
+    if (m) Qz.splice(2, 0, ['In this task, the microplastic filter …', ['removes the microplastics from the water that passes through it', 'adds plastic to the water', 'is only used when the town asks for it'], 0]);
+    return { T: T, G: G, Q: Qz };
+  }
+  function applyScenario(sc) {
+    var mk = makeTutorial(sc); TUT = mk.T; GLOSSARY = mk.G; QUIZ = mk.Q; applyScenario.sc = sc;
+    TERM_RX = []; GLOSSARY.forEach(function (g, i) { if (g[2]) TERM_RX.push({ i: i, re: g[2] }); });
+    $('lbl-src').textContent = sc === 'micro' ? 'River (raw water)' : 'Water supply';
+    $('lbl-filter').textContent = sc === 'micro' ? 'Microplastic filter' : 'Filter';
+    $('lbl-out').textContent = sc === 'micro' ? 'Town water tank' : 'Factory';
+    $('shape-factory').style.display = sc === 'micro' ? 'none' : ''; $('shape-tank').style.display = sc === 'micro' ? '' : 'none';
+  }
+  // underline glossary terms inside a plain-text string (first occurrence of each term); returns safe HTML
+  function tl(text) {
+    var t = esc(text), toks = [];
+    TERM_RX.forEach(function (tr) { t = t.replace(tr.re, function (mm) { toks.push('<span class="gt" data-g="' + tr.i + '">' + mm + '</span>'); return '\u0001' + (toks.length - 1) + '\u0002'; }); });
+    return t.replace(/\u0001(\d+)\u0002/g, function (_, n) { return toks[n]; });
+  }
+  // explicit link: show `label`, explain the glossary entry whose name starts with `name`
+  function gt(label, name) {
+    var k = -1; GLOSSARY.forEach(function (g, i) { if (k < 0 && g[0].toLowerCase().indexOf(name.toLowerCase()) === 0) k = i; });
+    return k < 0 ? esc(label) : '<span class="gt" data-g="' + k + '">' + esc(label) + '</span>';
+  }
+  function showTerm(el) {
+    var g = GLOSSARY[Number(el.dataset.g)], pop = $('termPop'); if (!g) return; showTerm.el = el;
+    pop.innerHTML = '<b>' + esc(g[0]) + '</b><br>' + esc(g[1]); pop.classList.remove('hidden');
+    placeTerm();
+    tutLog('term', { answers: [g[0]] });
+  }
+  // keep the explanation next to its word; if the word was redrawn, the explanation stays where it is until the next click
+  function placeTerm() {
+    var pop = $('termPop'), el = showTerm.el; if (!el || pop.classList.contains('hidden') || !document.body.contains(el)) return;
+    var r = el.getBoundingClientRect(), w = pop.offsetWidth, hh = pop.offsetHeight;
+    pop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+    pop.style.top = (r.bottom + 6 + hh < innerHeight ? r.bottom + 6 : Math.max(8, r.top - hh - 6)) + 'px';
+  }
+  function flowFig() {
+    return '<svg viewBox="0 0 560 90"><circle cx="70" cy="42" r="30" fill="#fff" stroke="#20384f" stroke-width="2"/><path d="M70,42 L88,26" stroke="#b23b2b" stroke-width="3"/><text x="70" y="86" font-size="12" text-anchor="middle" fill="#20384f">flow: 10 m³/h</text>' +
+      '<text x="150" y="48" font-size="22" fill="#20384f">×</text><text x="235" y="50" font-size="18" text-anchor="middle" fill="#20384f">168 hours</text><text x="235" y="86" font-size="12" text-anchor="middle" fill="#667">one week</text>' +
+      '<text x="318" y="48" font-size="22" fill="#20384f">=</text><rect x="360" y="14" width="150" height="50" rx="6" fill="#e3f1fb" stroke="#20384f"/><text x="435" y="46" font-size="18" text-anchor="middle" fill="#20384f">1,680 m³</text><text x="435" y="86" font-size="12" text-anchor="middle" fill="#667">delivered that week</text></svg>';
+  }
+  function settleFig() {
+    var h = '<svg viewBox="0 0 560 120"><line x1="50" y1="95" x2="300" y2="95" stroke="#9aa9b7"/><line x1="50" y1="95" x2="50" y2="12" stroke="#9aa9b7"/>';
+    h += '<path d="M50,90 C90,40 130,30 180,28 S260,27 300,27" fill="none" stroke="#b23b2b" stroke-width="3"/>';
+    h += '<text x="175" y="112" font-size="11" text-anchor="middle" fill="#667">time after the motor starts</text><text x="44" y="20" font-size="11" text-anchor="end" fill="#667">°C</text><text x="240" y="18" font-size="12" text-anchor="middle" fill="#b23b2b">settles (steady)</text>';
+    h += '<circle cx="380" cy="55" r="28" fill="#fff" stroke="#20384f" stroke-width="2"/><path d="M380,55 q-4,-22 6,-24 M380,55 q22,-4 24,6 M380,55 q4,22 -6,24 M380,55 q-22,4 -24,-6" stroke="#4b9bd6" stroke-width="3" fill="none"/><text x="380" y="104" font-size="12" text-anchor="middle" fill="#20384f">cooling fan</text>';
+    h += '<circle cx="490" cy="52" r="24" fill="#fff" stroke="#20384f" stroke-width="3"/><path d="M490,36 V54" stroke="#20384f" stroke-width="4" stroke-linecap="round"/><path d="M478,44 a17,17 0 1,0 24,0" fill="none" stroke="#20384f" stroke-width="4" stroke-linecap="round"/><text x="490" y="104" font-size="12" text-anchor="middle" fill="#20384f">shutdown</text></svg>';
+    return h;
+  }
+  function moneyFig(micro) {
+    var row = function (x, y, sign, t, col) { return '<text x="' + x + '" y="' + y + '" font-size="13" fill="' + col + '"><tspan font-weight="bold">' + sign + '</tspan> ' + t + '</text>'; };
+    return '<svg viewBox="0 0 560 120"><rect x="10" y="6" width="250" height="108" rx="6" fill="#eef8f1" stroke="#9cc9ab"/><text x="22" y="26" font-size="13" font-weight="bold" fill="#1f7a3c">Money in</text>' +
+      row(22, 50, '+', 'income: ' + (micro ? 'the water utility' : 'the factory') + ' pays', '#1f7a3c') + row(34, 68, '', 'for every m³ delivered', '#1f7a3c') +
+      '<rect x="290" y="6" width="260" height="108" rx="6" fill="#fbefed" stroke="#e0aaa2"/><text x="302" y="26" font-size="13" font-weight="bold" fill="#b23b2b">Money out</text>' +
+      row(302, 46, '−', 'electricity (per kWh)', '#b23b2b') + row(302, 64, '−', 'fixed operating cost', '#b23b2b') + row(302, 82, '−', 'shortfall penalty', '#b23b2b') + row(302, 100, '−', 'tests, repairs, upgrades, fines', '#b23b2b') + '</svg>';
+  }
+  function fixFig() {
+    var st = [['Notice symptoms', 'records, readings'], ['Test', 'collect evidence'], ['Diagnose', 'agree on causes'], ['Fix', 'order interventions']], h = '<svg viewBox="0 0 560 70"><defs><marker id="fxA" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#20384f"/></marker></defs>';
+    st.forEach(function (s, k) { var x = 8 + k * 140; h += '<rect x="' + x + '" y="10" width="118" height="50" rx="6" fill="#eef3f8" stroke="#20384f"/><text x="' + (x + 59) + '" y="32" font-size="13" font-weight="bold" text-anchor="middle" fill="#20384f">' + s[0] + '</text><text x="' + (x + 59) + '" y="50" font-size="11" text-anchor="middle" fill="#556">' + s[1] + '</text>' + (k < 3 ? '<line x1="' + (x + 119) + '" y1="35" x2="' + (x + 138) + '" y2="35" stroke="#20384f" stroke-width="2" marker-end="url(#fxA)"/>' : ''); });
+    return h + '</svg>';
+  }
+
+  // ---------------------------------------------------------------- dashboard tour: spotlight on the real dashboard, with a causal-map practice
+  var PRACTICE_VARS = [['temp', 'Outside temperature'], ['swim', 'Number of swimmers'], ['price', 'Ticket price'], ['towel', 'Towels to wash']];
+  var PRACTICE_NAMES = {}; PRACTICE_VARS.forEach(function (x) { PRACTICE_NAMES[x[0]] = x[1]; });
+  var tour = { i: 0, steps: [], on: false, done: false, practiceOK: false, pr: [], prActions: 0 };
+  function tourSteps(v) {
+    var s = [], p = v.permissions, hasAI = v.team.some(function (t) { return t.kind === 'ai'; }), have = [];
+    var li = function (x) { return '<li>' + x + '</li>'; };
+    s.push({ el: 'hdr', title: 'The top bar', text: (v.practiceWeeks ? 'The task starts with <b>' + v.practiceWeeks + ' practice weeks</b> that do not count. Then the plant is reset and <b>weeks 1 to 12</b> count. ' : '') + 'Here you see the <b>week</b>, the <b>plant value</b> and your team. A ✓ next to a name means that person has clicked Ready.<br>The buttons on the right open the <b>Glossary</b>, the <b>Tutorial</b>, the <b>Instructions</b> and this <b>Tour</b> again at any time.' });
+    if (v.operations) have.push('the operating records: water delivered, shortfall, hours stopped, shutdowns and money, week by week', 'what the operators noticed each week');
+    if (v.sensors) have.push('the sensor readings: weekly averages of water flow and motor temperature');
+    if (v.specs) have.push('the pump data sheet');
+    if (v.safety) have.push('the safety limits');
+    if (v.failureModes) have.push('the failure modes and their symptoms');
+    if (v.catalog) have.push('the catalog of repairs and upgrades');
+    s.push({ el: 'rolePanel', title: 'Your information (' + v.roleName + ')', text: 'This panel is yours. <b>Only you can see it.</b> It shows:<ul>' + have.map(li).join('') + '</ul>Your teammates see different information, so share what matters in the chat.<br>Words with a dotted underline, like ' + gt('shutdown', 'Shutdown') + ', can be clicked for a short explanation. Try it.' });
+    if (p.settings) s.push({ el: 'rpSettings', title: 'Pump settings', text: 'Only you can change the settings. Type the <b>pump speed</b> (40–100%, steps of 5) and the <b>valve opening</b> (20–100%, steps of 10), then click <b>Apply</b>. New settings count from the week that runs next.' });
+    if (p.tests) s.push({ el: 'rpTests', title: 'Diagnostic tests', text: 'You can run up to <b>2 tests per week</b>. Each test costs money, which lowers the plant value. Results appear in this panel under <b>Your test results</b>; only you see them.<br>For a <b>test run</b>, first type the pump speed and valve opening you want to try. A test run is a one-hour try-out; it does not change the plant\'s settings.' });
+    if (p.interventions) s.push({ el: 'catalogBox', title: 'Ordering repairs and upgrades', text: 'Click <b>Order</b> to buy a repair or upgrade. It is paid right away. <b>Effective after</b> tells how many weeks pass before it is installed and working. Agree with your team in the chat before you order.' });
+    s.push({ el: 'valueBox', title: 'Plant value', text: 'The line shows the plant value after each week, and the table gives the numbers. Your team\'s goal is to make this line go up <b>every week</b>.' });
+    s.push({ el: 'mapBox', title: 'The causal map', text: 'The causal map is your team\'s drawing of how the plant works. Each box is one quantity in the plant. An arrow from A to B means: changing A changes B.<ul><li><b style="color:#1f7a3c">Green +</b>: more A gives more B.</li><li><b style="color:#b23b2b">Red −</b>: more A gives less B.</li><li><b>Dashed</b>: not sure yet.</li></ul>To add an arrow, choose <b>From</b>, <b>to</b> and the <b>effect</b>, tick <b>not sure yet</b> if needed, and click <b>Add / update link</b>. You can also choose an <b>effect size</b> (small or large) and write <b>why</b>; both are optional. Every arrow is listed below the map with a <b>remove</b> button.<br>The map starts empty. Next you will practice on a practice map.' });
+    s.push({ practice: true, title: 'Practice: draw a causal map' });
+    s.push({ el: 'mapBox', title: 'Rules for your team\'s map', text: '<ul><li>Draw an arrow only when A changes B <b>directly</b>, not only by way of another box. (Example: outside temperature → number of swimmers → towels to wash. Do not also draw outside temperature → towels to wash.)</li><li>A → B and B → A are two separate arrows.</li><li>Use <b>not sure yet</b> for arrows you are still checking. Adding an arrow that already exists replaces it, so you can change its sign or make it sure.</li><li>Everyone can edit the map. Say in the chat when you change it.</li><li>The map does not change the plant. It is saved at the end of ' + (v.practiceWeeks ? 'practice, ' : '') + '<b>week 4</b> and <b>week 12</b> as part of your team\'s work.</li></ul>' });
+    s.push({ el: 'diagBox', title: 'Diagnosis and recommendation', text: 'Your team must hand in a diagnosis <b>before week 7</b> and a final one <b>before week 12</b>.<br>Open <b>Write a proposal</b>, tick the causes you think are true and the fixes you recommend, write which evidence supports them, and click <b>Propose to the team</b>. The other human team members then click <b>Approve</b>. When everyone has approved, it is handed in. You can propose a new version at any time.' });
+    s.push({ el: 'chatSec', title: 'Team chat', text: 'The chat is the only way to share information and agree on plans. Type a message and press Enter or click <b>Send</b>.' + (hasAI ? ' Messages from the AI teammate are marked <span class="badge">AI</span>.' : '') });
+    s.push({ el: 'readyBox', title: 'Ready for next week', text: 'When your team has made its changes for the week, click <b>Ready for next week</b>. The week runs when every person is ready. A message above the button tells you if something must be done first, for example the diagnosis.<br><br>That is the end of the tour. ' + (v.indiv && !v.indiv.pre ? 'Next, you will draw <b>your own</b> first map.' : 'A good first step: say hello in the chat and share what you see.') });
+    return s;
+  }
+  // the same map controls are used for the practice map and for each person's own map
+  function mapControlsHTML(px, vars) {
+    var opts = vars.map(function (x) { return '<option value="' + x[0] + '">' + esc(x[1]) + '</option>'; }).join('');
+    return '<div class="row">From <select id="' + px + 'From">' + opts + '</select> to <select id="' + px + 'To">' + opts + '</select> effect <select id="' + px + 'Sign"><option value="+">+ (more → more)</option><option value="-">− (more → less)</option></select>' +
+      '<label><input type="checkbox" id="' + px + 'Unc"> not sure yet (dashed)</label></div>' +
+      '<div class="row">effect size <select id="' + px + 'Size"><option value="">not rated</option><option value="small">small</option><option value="large">large</option></select> why? <input id="' + px + 'Why" size="24" maxlength="300" placeholder="optional: your reason"> <button id="' + px + 'Add">Add / update link</button></div>';
+  }
+  function readControls(px) { return { from: $(px + 'From').value, to: $(px + 'To').value, sign: $(px + 'Sign').value, certain: !$(px + 'Unc').checked, size: $(px + 'Size').value, why: $(px + 'Why').value.trim() }; }
+  function practiceHTML() {
+    return '<p style="margin:2px 0">This practice map is about an outdoor swimming pool, not the plant. It uses the same controls as your team\'s map. Do these three things:</p><ol id="prTasks">' +
+      '<li data-k="1">Add an arrow: a higher <b>Outside temperature</b> gives a larger <b>Number of swimmers</b> (sure).</li>' +
+      '<li data-k="2">Add an arrow: a higher <b>Ticket price</b> gives a smaller <b>Number of swimmers</b>, but you are <b>not sure yet</b>.</li>' +
+      '<li data-k="3">Someone drew <b>Towels to wash → Number of swimmers</b>. That is the wrong direction: washing towels does not bring swimmers. <b>Remove</b> it and add <b>Number of swimmers → Towels to wash</b> (+).</li></ol>' +
+      '<svg id="prSvg" viewBox="0 0 520 240"></svg>' + mapControlsHTML('pr', PRACTICE_VARS) +
+      '<div class="note">Effect size and "why?" are optional here.</div><div id="prList" class="note"></div><div id="prMsg"></div><button id="prShow" style="font-size:12px">Show me the answer</button>';
+  }
+  function practiceInit() {
+    if (!tour.pr.length && !tour.practiceOK) tour.pr = [{ from: 'towel', to: 'swim', sign: '+', certain: true }];
+    $('prTo').value = 'swim';
+    $('prAdd').onclick = function () {
+      var a = readControls('pr');
+      if (a.from === a.to) { $('prMsg').textContent = 'An arrow needs two different boxes.'; return; }
+      tour.pr = tour.pr.filter(function (e) { return !(e.from === a.from && e.to === a.to); }); tour.pr.push(a); $('prWhy').value = ''; practiceUpdate('add');
+    };
+    $('prShow').onclick = function () {
+      tour.pr = [{ from: 'temp', to: 'swim', sign: '+', certain: true }, { from: 'price', to: 'swim', sign: '-', certain: false }, { from: 'swim', to: 'towel', sign: '+', certain: true }];
+      practiceUpdate('show_answer'); $('prMsg').textContent = 'This is the answer. Look at how each arrow is drawn, then click Next.';
+    };
+    practiceUpdate(null);
+  }
+  function practiceUpdate(what) {
+    var has = function (f, t, sg, c) { return tour.pr.some(function (e) { return e.from === f && e.to === t && e.sign === sg && (c === undefined || e.certain === c); }); };
+    var done = { 1: has('temp', 'swim', '+', true), 2: has('price', 'swim', '-', false), 3: !tour.pr.some(function (e) { return e.from === 'towel' && e.to === 'swim'; }) && has('swim', 'towel', '+') };
+    var wanted = function (e) { return (e.from === 'temp' && e.to === 'swim') || (e.from === 'price' && e.to === 'swim') || (e.from === 'swim' && e.to === 'towel') || (e.from === 'towel' && e.to === 'swim'); };
+    var extra = tour.pr.filter(function (e) { return !wanted(e); });
+    $('prSvg').innerHTML = mapSVG(PRACTICE_VARS, tour.pr, 260, 120, 180, 88, 'pr');
+    $('prList').innerHTML = mapListHTML(tour.pr, PRACTICE_NAMES, false);
+    $('prList').querySelectorAll('[data-rm]').forEach(function (b) { b.onclick = function () { var q = b.dataset.rm.split('|'); tour.pr = tour.pr.filter(function (e) { return !(e.from === q[0] && e.to === q[1]); }); practiceUpdate('remove'); }; });
+    $('prTasks').querySelectorAll('li').forEach(function (li) { li.classList.toggle('ok', !!done[li.dataset.k]); });
+    var n = (done[1] ? 1 : 0) + (done[2] ? 1 : 0) + (done[3] ? 1 : 0), ok = n === 3 && !extra.length;
+    if (what) {
+      tour.prActions++;
+      var hint = '';
+      if (extra.length) hint = 'There is an extra arrow (' + PRACTICE_NAMES[extra[0].from] + ' → ' + PRACTICE_NAMES[extra[0].to] + '). Remove it with its remove button.';
+      else if (!done[1] && has('temp', 'swim', '+', false)) hint = 'Outside temperature → Number of swimmers should be sure: untick "not sure yet" and click Add / update link again.';
+      else if (!done[1] && has('temp', 'swim', '-')) hint = 'Warmer weather brings MORE swimmers, so the effect is + (more → more).';
+      else if (!done[2] && has('price', 'swim', '-', true)) hint = 'Ticket price → Number of swimmers should be dashed: tick "not sure yet" and click Add / update link again.';
+      else if (!done[2] && has('price', 'swim', '+')) hint = 'A higher price gives FEWER swimmers, so the effect is − (more → less).';
+      else if (ok) hint = 'Well done. Click Next.';
+      if (what !== 'show_answer') $('prMsg').textContent = hint;
+      tutLog('map_practice', { answers: tour.pr.map(function (e) { return e.from + '>' + e.to + e.sign + (e.certain ? '' : '?'); }), correct: n, attempt: tour.prActions, slide: what === 'show_answer' ? 0 : 1 });
+    }
+    if (ok || what === 'show_answer') tour.practiceOK = true;
+    $('tourNext').disabled = !tour.practiceOK;
+  }
+
+  // ---------------------------------------------------------------- each person's own map (before the first week and after week 12)
+  var indiv = { open: false, when: null, drafts: {}, confirmEmpty: false };
+  function openIndiv(when) {
+    indiv.open = true; indiv.when = when; indiv.confirmEmpty = false;
+    var key = myRole + '_' + when; indiv.drafts[key] = indiv.drafts[key] || [];
+    var pre = when === 'pre';
+    $('indivBody').innerHTML = '<h2>' + (pre ? 'Your own first map' : 'Your own final map') + ' (' + esc(NAMES[myRole]) + ')</h2>' +
+      '<p>' + (pre ? 'Before the ' + (view && view.practiceWeeks ? 'practice weeks start' : 'first week') + ', draw what <b>you</b> think: which quantities in the plant change which? Only you see this map. It is not shared with your team, and it does not change the plant. It is fine to guess, to use "not sure yet", or to leave arrows out.'
+        : 'The task is over. Please draw your own map one more time: what do <b>you</b> now think changes what in the plant? Only you see this map. Your team map is not changed.') + ' Draw arrows only for direct effects.</p>' +
+      '<svg id="inSvg" viewBox="0 0 520 300" style="width:100%;border:1px solid #e2e6ea;background:#fcfdfe"></svg>' + mapControlsHTML('in', PS.VARS) +
+      '<div id="inList" class="note"></div><div id="inMsg" class="gate"></div><div class="row"><button class="primary" id="inSubmit">Hand in my map</button></div>';
+    $('inTo').value = 'flow';
+    $('inAdd').onclick = function () {
+      var a = readControls('in'), d = indiv.drafts[myRole + '_' + indiv.when];
+      if (a.from === a.to) { $('inMsg').textContent = 'An arrow needs two different boxes.'; return; }
+      indiv.drafts[myRole + '_' + indiv.when] = d.filter(function (e) { return !(e.from === a.from && e.to === a.to); }).concat([a]); $('inWhy').value = ''; indiv.confirmEmpty = false; indivUpdate();
+    };
+    $('inSubmit').onclick = function () {
+      var d = indiv.drafts[myRole + '_' + indiv.when];
+      if (!d.length && !indiv.confirmEmpty) { indiv.confirmEmpty = true; $('inMsg').textContent = 'You have not drawn any arrows. Click "Hand in my map" again to hand in an empty map.'; return; }
+      act({ type: 'indiv_map', when: indiv.when, edges: d });
+      $('indivOv').classList.add('hidden'); indiv.open = false;
+    };
+    indivUpdate(); $('indivOv').classList.remove('hidden');
+    tutLog('own_map_open', { slide: pre ? 1 : 2 });
+  }
+  function indivUpdate() {
+    var d = indiv.drafts[myRole + '_' + indiv.when];
+    $('inSvg').innerHTML = mapSVG(PS.VARS, d, 260, 150, 188, 118, 'in');
+    $('inList').innerHTML = mapListHTML(d, VARN, false);
+    $('inList').querySelectorAll('[data-rm]').forEach(function (b) { b.onclick = function () { var q = b.dataset.rm.split('|'); indiv.drafts[myRole + '_' + indiv.when] = d.filter(function (e) { return !(e.from === q[0] && e.to === q[1]); }); indivUpdate(); }; });
+  }
+  function showMsg(html) { $('msgBody').innerHTML = html; $('msgOv').classList.remove('hidden'); }
+  function tourShow() {
+    var st = tour.steps[tour.i];
+    $('tourStep').textContent = 'Dashboard tour, step ' + (tour.i + 1) + ' of ' + tour.steps.length;
+    $('tourTitle').textContent = st.title;
+    $('tourText').innerHTML = st.practice ? practiceHTML() : st.text;
+    $('tourBox').classList.toggle('wide', !!st.practice);
+    $('tourBack').disabled = tour.i === 0;
+    $('tourNext').textContent = tour.i === tour.steps.length - 1 ? 'Start the task' : 'Next';
+    $('tourNext').disabled = false;
+    if (st.practice) practiceInit();
+    var el = st.el && $(st.el); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+    tourPlace();
+    tutLog('tour_step', { slide: tour.i + 1 });
+  }
+  function tourPlace() {
+    if (!tour.on) return;
+    var st = tour.steps[tour.i], box = $('tourBox'), spot = $('tourSpot'), el = st.el && $(st.el), W = innerWidth, H = innerHeight;
+    var bw = box.offsetWidth, bh = box.offsetHeight, x, y, g = 14;
+    $('tourBlock').style.background = (!el || !el.offsetParent) ? 'rgba(15,25,35,.55)' : '';
+    if (!el || !el.offsetParent) { spot.classList.add('hidden'); box.style.left = Math.max(8, (W - bw) / 2) + 'px'; box.style.top = Math.max(8, (H - bh) / 2) + 'px'; return; }
+    var r = el.getBoundingClientRect();
+    spot.classList.remove('hidden');
+    spot.style.left = (r.left - 5) + 'px'; spot.style.top = (Math.max(r.top, 0) - 5) + 'px'; spot.style.width = (r.width + 10) + 'px'; spot.style.height = (Math.min(r.bottom, H) - Math.max(r.top, 0) + 10) + 'px';
+    if (r.right + g + bw < W) { x = r.right + g; y = r.top; }
+    else if (r.left - g - bw > 0) { x = r.left - g - bw; y = r.top; }
+    else if (r.bottom + g + bh < H) { x = r.left; y = r.bottom + g; }
+    else if (r.top - g - bh > 0) { x = r.left; y = r.top - g - bh; }
+    else { x = (W - bw) / 2; y = H - bh - 8; }
+    box.style.left = Math.max(8, Math.min(x, W - bw - 8)) + 'px'; box.style.top = Math.max(8, Math.min(y, H - bh - 8)) + 'px';
+  }
+  function startTour() {
+    if (!view) return;
+    tour.steps = tourSteps(view); tour.i = 0; tour.on = true; tour.prActions = 0;
+    if (!tour.practiceOK) tour.pr = [];
+    ['tourBlock', 'tourBox'].forEach(function (id) { $(id).classList.remove('hidden'); });
+    tutLog('tour_start', {}); tourShow();
+  }
+  function endTour() {
+    tour.on = false; tour.done = true;
+    ['tourBlock', 'tourBox', 'tourSpot'].forEach(function (id) { $(id).classList.add('hidden'); });
+    $('instrClose').textContent = 'Close';
+    tutLog('tour_done', {});
+    if (view && view.kind === 'human' && !view.finished && !view.indiv.pre && !indiv.open) openIndiv('pre');
+  }
+  function microIllustration() {
+    var cols = ['#e05d5d', '#4b9bd6', '#f2b134', '#5cb85c', '#9b6dd6', '#e07b39'], h = '<svg viewBox="0 0 560 120"><circle cx="110" cy="60" r="52" fill="#e9f4fb" stroke="#20384f" stroke-width="2"/>';
+    for (var k = 0; k < 22; k++) { var a = k * 2.4, r = 8 + (k * 13) % 38, x = 110 + r * Math.cos(a), y = 60 + r * Math.sin(a); h += (k % 3 ? '<rect x="' + x + '" y="' + y + '" width="5" height="3" transform="rotate(' + (k * 37) + ' ' + x + ' ' + y + ')" fill="' + cols[k % 6] + '"/>' : '<path d="M' + x + ',' + y + ' q4,-5 9,0" stroke="' + cols[k % 6] + '" stroke-width="1.6" fill="none"/>'); }
+    h += '<text x="110" y="118" font-size="12" text-anchor="middle" fill="#20384f">river water, magnified</text>';
+    h += '<line x1="230" y1="60" x2="300" y2="60" stroke="#20384f" stroke-width="2" marker-end="url(#mArrow)"/><defs><marker id="mArrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#20384f"/></marker></defs>';
+    h += '<rect x="310" y="22" width="70" height="76" rx="6" fill="url(#mesh2b)" stroke="#e07b00" stroke-width="3"/><defs><pattern id="mesh2b" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0,6 L6,0" stroke="#c4d1dc" stroke-width="1"/></pattern></defs><text x="345" y="116" font-size="12" text-anchor="middle" fill="#20384f">microplastic filter</text>';
+    h += '<line x1="390" y1="60" x2="450" y2="60" stroke="#20384f" stroke-width="2" marker-end="url(#mArrow)"/><circle cx="500" cy="60" r="40" fill="#e9f4fb" stroke="#20384f" stroke-width="2"/><text x="500" y="64" font-size="12" text-anchor="middle" fill="#1f7a3c">clean</text><text x="500" y="118" font-size="12" text-anchor="middle" fill="#20384f">treated drinking water</text>';
+    return h + '<text x="265" y="40" font-size="11" text-anchor="middle" fill="#667">pieces smaller than 5 mm</text></svg>';
+  }
+  var tut = { i: 0, t0: 0, attempts: 0, passed: false, done: false };
+  function scale(name, ticks, unit, lo, hi) {
+    var h = '<svg viewBox="0 0 560 70"><line x1="40" y1="30" x2="520" y2="30" stroke="#20384f" stroke-width="3"/>';
+    ticks.forEach(function (t, k) { var x = 40 + 480 * k / (ticks.length - 1); h += '<line x1="' + x + '" y1="22" x2="' + x + '" y2="38" stroke="#20384f" stroke-width="2"/><text x="' + x + '" y="56" font-size="13" text-anchor="middle" fill="#20384f">' + t + unit + '</text>'; });
+    return h + '<text x="40" y="14" font-size="11" fill="#667">' + lo + '</text><text x="520" y="14" font-size="11" fill="#667" text-anchor="end">' + hi + '</text></svg>';
+  }
+  function valves() {
+    var h = '<svg viewBox="0 0 560 100">';
+    [[100, 'fully open (100%)'], [50, 'half open (50%)'], [20, 'mostly closed (20%)']].forEach(function (v, k) {
+      var x = 60 + k * 180, gap = 26 * v[0] / 100;
+      h += '<rect x="' + (x - 40) + '" y="22" width="80" height="34" fill="#cfe5f6" stroke="#9aa9b7"/>' +
+        '<rect x="' + (x - 6) + '" y="22" width="12" height="' + (34 - gap) + '" fill="#20384f"/>' +
+        '<text x="' + x + '" y="80" font-size="12" text-anchor="middle" fill="#20384f">' + v[1] + '</text>';
+    });
+    return h + '</svg>';
+  }
+  function filters(micro) {
+    var h = '<svg viewBox="0 0 560 110">';
+    [[0, 'clean (0% clogged)'], [45, 'partly clogged (45%)'], [85, 'heavily clogged (85%)']].forEach(function (f, k) {
+      var x = 60 + k * 180, cells = [], n = Math.round(f[0] / 100 * 54);
+      for (var c = 0; c < 54; c++) cells.push(c);
+      cells.sort(function (a, b) { return ((a * 37) % 54) - ((b * 37) % 54); });
+      h += '<rect x="' + (x - 40) + '" y="10" width="80" height="60" rx="5" fill="url(#mesh2)" stroke="#20384f"/>';
+      for (var d = 0; d < n; d++) { var cc = cells[d], col = cc % 9, row = Math.floor(cc / 9); h += '<circle cx="' + (x - 34 + col * 8.5) + '" cy="' + (16 + row * 9.5) + '" r="3.2" fill="' + (micro ? ['#e05d5d', '#4b9bd6', '#f2b134', '#5cb85c', '#9b6dd6', '#8a6d3b'][cc % 6] : '#8a6d3b') + '"/>'; }
+      h += '<text x="' + x + '" y="92" font-size="12" text-anchor="middle" fill="#20384f">' + f[1] + '</text>';
+    });
+    return h.replace('<svg viewBox="0 0 560 110">', '<svg viewBox="0 0 560 110"><defs><pattern id="mesh2" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0,6 L6,0" stroke="#c4d1dc" stroke-width="1"/></pattern></defs>') + '</svg>';
+  }
+  function readings() {
+    return '<svg viewBox="0 0 560 90"><circle cx="70" cy="42" r="30" fill="#fff" stroke="#20384f" stroke-width="2"/><path d="M70,42 L88,26" stroke="#b23b2b" stroke-width="3"/><text x="70" y="86" font-size="12" text-anchor="middle" fill="#20384f">water flow (m³/h)</text>' +
+      '<rect x="245" y="8" width="14" height="52" rx="7" fill="#fff" stroke="#b23b2b" stroke-width="2"/><circle cx="252" cy="64" r="10" fill="#b23b2b"/><rect x="249" y="26" width="6" height="36" fill="#b23b2b"/><text x="252" y="86" font-size="12" text-anchor="middle" fill="#20384f">motor temperature (°C)</text>' +
+      '<circle cx="460" cy="40" r="26" fill="#fff" stroke="#20384f" stroke-width="3"/><path d="M460,22 V42" stroke="#20384f" stroke-width="4" stroke-linecap="round"/><path d="M447,30 a19,19 0 1,0 26,0" fill="none" stroke="#20384f" stroke-width="4" stroke-linecap="round"/><text x="460" y="86" font-size="12" text-anchor="middle" fill="#20384f">shutdown (stopped)</text></svg>';
+  }
+  function valueChart() {
+    var pts = [0, 1, 2, 3, 4, 5, 6], v = [50, 44, 47, 40, 52, 58, 55], h = '<svg viewBox="0 0 560 110"><line x1="40" y1="90" x2="530" y2="90" stroke="#9aa9b7"/>';
+    var X = function (i) { return 40 + i * 80; }, Y = function (y) { return 100 - y * 1.4; };
+    h += '<polyline fill="none" stroke="#20384f" stroke-width="2.5" points="' + pts.map(function (i) { return X(i) + ',' + Y(v[i]); }).join(' ') + '"/>';
+    pts.forEach(function (i) { h += '<circle cx="' + X(i) + '" cy="' + Y(v[i]) + '" r="4" fill="#20384f"/><text x="' + X(i) + '" y="106" font-size="11" text-anchor="middle" fill="#667">wk ' + i + '</text>'; });
+    return h + '<text x="40" y="14" font-size="11" fill="#667">plant value (example; not the real numbers)</text></svg>';
+  }
+  function exampleMap() {
+    var box = function (x, y, t) { return '<rect x="' + (x - 75) + '" y="' + (y - 15) + '" width="150" height="30" rx="5" fill="#fff" stroke="#20384f"/><text x="' + x + '" y="' + (y + 4) + '" font-size="12" text-anchor="middle" fill="#20384f">' + t + '</text>'; };
+    return '<svg viewBox="0 0 560 150"><defs><marker id="exp" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#1f7a3c"/></marker><marker id="exn" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#b23b2b"/></marker></defs>' +
+      box(100, 25, 'Hours of studying') + box(100, 125, 'Hours on the phone') + box(450, 75, 'Test score') + box(100, 75, 'Hours of sleep') +
+      '<line x1="176" y1="30" x2="372" y2="68" stroke="#1f7a3c" stroke-width="2.5" marker-end="url(#exp)"/><text x="270" y="40" font-size="15" fill="#1f7a3c" font-weight="bold">+</text>' +
+      '<line x1="176" y1="120" x2="372" y2="84" stroke="#b23b2b" stroke-width="2.5" marker-end="url(#exn)"/><text x="270" y="118" font-size="15" fill="#b23b2b" font-weight="bold">−</text>' +
+      '<line x1="176" y1="75" x2="372" y2="75" stroke="#1f7a3c" stroke-width="2.5" stroke-dasharray="6,5" marker-end="url(#exp)"/><text x="215" y="66" font-size="12" fill="#1f7a3c">+ (not sure yet)</text></svg>';
+  }
+  function tutLog(event, extra) { try { act(Object.assign({ type: 'tutorial', event: event, seconds: Math.round((Date.now() - tut.t0) / 100) / 10 }, extra || {})); } catch (e) { } }
+  function tutShow() {
+    var s = TUT[tut.i], sys = $('tutSys');
+    $('tutStep').textContent = 'Tutorial — step ' + (tut.i + 1) + ' of ' + TUT.length;
+    $('tutDots').innerHTML = TUT.map(function (x, k) { return '<span class="' + (k <= tut.i ? 'on' : '') + '"></span>'; }).join('');
+    $('tutTitle').textContent = s.title;
+    $('tutText').innerHTML = s.text + (s.quiz ? quizHTML() : '');
+    sys.classList.toggle('focus', !!s.focus);
+    sys.querySelectorAll('.part').forEach(function (g) { g.classList.toggle('hl', !!(s.focus && s.focus.indexOf(g.id) >= 0)); });
+    sys.style.display = (s.quiz || s.hideSys) ? 'none' : '';
+    $('tutExtra').innerHTML = (!s.quiz && s.extra) ? s.extra() : '';
+    $('tutVocab').innerHTML = (s.vocab || []).map(function (v) { return '<span>' + esc(v) + '</span>'; }).join('');
+    $('tutBack').disabled = tut.i === 0;
+    $('tutMsg').textContent = '';
+    if (s.quiz) { $('tutNext').textContent = tut.passed ? 'Continue to your instructions' : 'Check answers'; }
+    else $('tutNext').textContent = 'Next';
+    tutLog('slide', { slide: tut.i + 1 });
+  }
+  function quizHTML() {
+    return '<div class="quiz">' + QUIZ.map(function (q, k) {
+      return '<div class="q" id="q' + k + '"><b>' + (k + 1) + '. ' + esc(q[0]) + '</b>' + [0, 1, 2].map(function (r) { var j = (r + k) % 3; return '<label><input type="radio" name="qq' + k + '" value="' + j + '"> ' + esc(q[1][j]) + '</label>'; }).join('') + '<div class="fb"></div></div>';
+    }).join('') + '</div>';
+  }
+  function tutNext() {
+    var s = TUT[tut.i];
+    if (!s.quiz) { tut.i++; return tutShow(); }
+    if (tut.passed) return tutFinish();
+    tut.attempts++;
+    var answers = [], correct = 0;
+    QUIZ.forEach(function (q, k) {
+      var sel = document.querySelector('input[name="qq' + k + '"]:checked'), a = sel ? Number(sel.value) : -1, ok = a === q[2], fb = $('q' + k).querySelector('.fb');
+      answers.push(a); if (ok) correct++;
+      fb.className = 'fb ' + (ok ? 'good' : 'bad');
+      fb.textContent = ok ? 'Correct.' : (tut.attempts >= 2 ? 'The right answer is: ' + q[1][q[2]] + '.' : 'Not quite — have another look at the tutorial or try again.');
+    });
+    tutLog('check', { answers: answers, correct: correct, attempt: tut.attempts });
+    if (correct === QUIZ.length || tut.attempts >= 2) { tut.passed = true; $('tutNext').textContent = 'Continue to your instructions'; $('tutMsg').textContent = correct === QUIZ.length ? 'All correct.' : 'Please read the right answers above, then continue.'; }
+  }
+  function tutFinish() {
+    tut.done = true; $('tut').classList.add('hidden'); tutLog('done', {});
+    $('instrBody').innerHTML = instructions(view); $('instrClose').textContent = tour.done ? 'Close' : 'Next: a short tour of the screen'; $('instr').classList.remove('hidden');
+  }
+  function startTutorial() { applyScenario(view && view.scenario); tut.i = 0; tut.t0 = Date.now(); tutLog('start', {}); $('tut').classList.remove('hidden'); tutShow(); }
+  function showGlossary() { applyScenario(view && view.scenario); $('glossBody').innerHTML = GLOSSARY.map(function (g) { return '<dt>' + esc(g[0]) + '</dt><dd>' + esc(g[1]) + '</dd>'; }).join(''); $('gloss').classList.remove('hidden'); }
+
+  // ---------------------------------------------------------------- event wiring
+  function wire() {
+    $('setSpeed').oninput = $('setValve').oninput = function () { $('setSpeed').dataset.dirty = '1'; };
+    $('setApply').onclick = function () { act({ type: 'set', speed: Number($('setSpeed').value), valve: Number($('setValve').value) }); delete $('setSpeed').dataset.dirty; };
+    $('mAdd').onclick = function () { act({ type: 'map_add', from: $('mFrom').value, to: $('mTo').value, sign: $('mSign').value, certain: !$('mUncertain').checked, size: $('mSize').value, why: $('mWhy').value }); $('mWhy').value = ''; };
+    $('msgClose').onclick = function () { $('msgOv').classList.add('hidden'); };
+    $('dPropose').onclick = function () {
+      var c = [].slice.call($('dCauses').querySelectorAll('input:checked')).map(function (i) { return i.value; });
+      var it = [].slice.call($('dInts').querySelectorAll('input:checked')).map(function (i) { return i.value; });
+      act({ type: 'diag_propose', causes: c, interventions: it, justification: $('dJust').value });
+    };
+    $('chatSend').onclick = function () { var t = $('chatIn').value.trim(); if (!t) return; $('chatIn').value = ''; act({ type: 'chat', text: t }); };
+    $('chatIn').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chatSend').click(); } });
+    $('readyBtn').onclick = function () { act({ type: 'ready', value: !view.ready }); };
+    $('btnInstr').onclick = function () { $('instrBody').innerHTML = instructions(view); $('instrClose').textContent = tour.done ? 'Close' : 'Next: a short tour of the screen'; $('instr').classList.remove('hidden'); };
+    $('instrClose').onclick = function () { $('instr').classList.add('hidden'); if (!tour.done && !tour.on) startTour(); };
+    $('btnTour').onclick = function () { if (!tour.on) startTour(); };
+    $('tourNext').onclick = function () { if (tour.i >= tour.steps.length - 1) return endTour(); tour.i++; tourShow(); };
+    $('tourBack').onclick = function () { if (tour.i > 0) { tour.i--; tourShow(); } };
+    document.addEventListener('click', function (e) {
+      var g = e.target.closest ? e.target.closest('.gt') : null;
+      if (g) { e.preventDefault(); showTerm(g); return; }
+      if (!(e.target.closest && e.target.closest('#termPop'))) $('termPop').classList.add('hidden');
+    }, true);
+    window.addEventListener('resize', function () { tourPlace(); $('termPop').classList.add('hidden'); });
+    window.addEventListener('scroll', function () { tourPlace(); placeTerm(); }, true);
+    $('tutNext').onclick = tutNext; $('tutBack').onclick = function () { if (tut.i > 0) { tut.i--; tutShow(); } };
+    $('btnGloss').onclick = showGlossary; $('glossClose').onclick = function () { $('gloss').classList.add('hidden'); };
+    $('btnTut').onclick = function () { tut.passed = tut.passed || tut.done; startTutorial(); };
+    $('endClose').onclick = function () { $('endScreen').classList.add('hidden'); };
+    $('endLog').onclick = downloadLocalLog;
+  }
+  function downloadLocalLog() {
+    var r = localRoom, data = { room: r.id, config: r.config, seed: r.seed, scores: r.scores(), chat: r.chat, diagnosis: r.diagnosis, map: r.map, mapSnapshots: r.mapSnapshots, individualMaps: r.indivMaps, practiceHistory: r.practicePlant ? r.practicePlant.history : null, history: r.plant.history, log: r.log };
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = 'pumpstation_' + r.config + '_' + Date.now() + '.json'; a.click();
+  }
+
+  // ---------------------------------------------------------------- local mode
+  function startLocal(config, seed, llmCfg, scenario, practiceWeeks) {
+    var llm = PS.makeLLM(Object.assign({ browser: true }, llmCfg));
+    debug = true;
+    localRoom = new PS.Room({ id: 'LOCAL', config: config, seed: seed, scenario: scenario || DEFAULT_SCEN, practiceWeeks: practiceWeeks, llm: llm, onChange: function () { var v = localRoom.viewFor(myRole); v.aiTyping = localRoom.aiBusy; render(v); } });
+    localRoom.event('local_llm', 'system', { provider: llmCfg.provider, model: llmCfg.model });
+    var humans = localRoom.humanRoles(); humans.forEach(function (r) { localRoom.join(r); });
+    myRole = humans[0];
+    act = function (a) { var e = localRoom.act(myRole, a); if (e) toast(e); };
+    if (humans.length > 1) {
+      $('hDebug').innerHTML = 'Play as: ' + humans.map(function (r) { return '<button data-as="' + r + '" style="padding:1px 8px">' + NAMES[r] + '</button>'; }).join(' ') + ' <button id="dlLog" style="padding:1px 8px">Log</button>';
+      $('hDebug').querySelectorAll('[data-as]').forEach(function (b) { b.onclick = function () { myRole = b.dataset.as; staticBuilt = false; renderChat.n = -1; localRoom.onChange(); }; });
+    } else $('hDebug').innerHTML = '<button id="dlLog" style="padding:1px 8px">Log</button>';
+    $('dlLog').onclick = downloadLocalLog;
+    $('app').classList.remove('hidden'); $('landing').classList.add('hidden');
+    localRoom.onChange();
+    localRoom.scheduleAI('week');
+  }
+  // ---------------------------------------------------------------- server mode
+  function startServer(room, role) {
+    var key = 'ps_' + room + '_' + role, token = sessionStorage.getItem(key);
+    var go = function (tok) {
+      myRole = role;
+      act = function (a) { fetch('/api/act', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ room: room, token: tok, action: a }) }).then(function (r) { return r.json(); }).then(function (j) { if (j.error) toast(j.error); }).catch(function () { toast('Connection problem — please try again.'); }); };
+      var es = new EventSource('/api/stream?room=' + encodeURIComponent(room) + '&token=' + tok);
+      es.onmessage = function (e) { render(JSON.parse(e.data)); };
+      es.onerror = function () { $('typing').textContent = 'Connection lost — reconnecting…'; };
+      $('app').classList.remove('hidden'); $('landing').classList.add('hidden');
+    };
+    if (token) return go(token);
+    fetch('/api/join', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ room: room, role: role }) })
+      .then(function (r) { return r.json(); }).then(function (j) { if (j.error) { toast(j.error); showLanding(); return; } sessionStorage.setItem(key, j.token); go(j.token); });
+  }
+  // ---------------------------------------------------------------- landing / console
+  function showLanding() {
+    $('landing').classList.remove('hidden');
+    if (location.protocol.indexOf('http') === 0) $('console').classList.remove('hidden');
+    $('lJoin').onclick = function () { location.search = '?room=' + encodeURIComponent($('lCode').value.trim().toUpperCase()) + '&role=' + $('lRole').value; };
+    $('pStart').onclick = function () { startLocal($('pConfig').value, Number($('pSeed').value) || 7, { provider: $('pProvider').value, model: $('pModel').value, apiKey: $('pKey').value }, $('pScen').value, Number($('pPrac').value)); };
+    $('cCreate').onclick = function () {
+      fetch('/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ adminKey: $('cKey').value, config: $('cConfig').value, scenario: $('cScen').value, seed: $('cSeed').value, practiceWeeks: $('cPrac').value }) })
+        .then(function (r) { return r.json(); }).then(function (j) { if (j.error) return toast(j.error); $('cOut').innerHTML = 'Team <b>' + j.room + '</b> (' + j.config + ', ' + j.scenario + '). Links: ' + j.links.map(function (l) { return '<a href="' + l.url + '" target="_blank">' + NAMES[l.role] + '</a>'; }).join(' · '); });
+    };
+    $('cList').onclick = function () {
+      fetch('/api/rooms?adminKey=' + encodeURIComponent($('cKey').value)).then(function (r) { return r.json(); }).then(function (j) {
+        if (j.error) return toast(j.error);
+        $('cOut').innerHTML = '<table><tr><th class="l">Team</th><th>Config</th><th>Scenario</th><th>Week</th><th>Joined</th><th>Trend 2–12</th><th>Value</th><th></th></tr>' + j.map(function (r) { return '<tr><td class="l">' + r.room + '</td><td>' + r.config + '</td><td>' + r.scenario + '</td><td>' + (r.finished ? 'done' : r.week) + '</td><td>' + r.joined.join(', ') + '</td><td>' + r.primary.trendScore_2to12 + '</td><td>' + fmt(r.primary.finalValue) + '</td><td><a target="_blank" href="/api/log?room=' + r.room + '&adminKey=' + encodeURIComponent($('cKey').value) + '">log</a></td></tr>'; }).join('') + '</table>';
+      });
+    };
+    var cfg = Q.get('config'); if (cfg) $('pConfig').value = cfg; $('pScen').value = DEFAULT_SCEN; $('cScen').value = DEFAULT_SCEN;
+  }
+
+  wire();
+  if (Q.get('room') && Q.get('role')) startServer(Q.get('room').toUpperCase(), Q.get('role'));
+  else if (Q.get('local')) startLocal(Q.get('config') || 'HA', Number(Q.get('seed')) || 7, { provider: 'mock' }, DEFAULT_SCEN);
+  else showLanding();
+  window.PS_CLIENT = { startLocal: startLocal, room: function () { return localRoom; }, setRole: function (r) { myRole = r; staticBuilt = false; renderChat.n = -1; localRoom.onChange(); } };
+})();
+</script>
+</body>
+</html>
